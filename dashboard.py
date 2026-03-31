@@ -61,10 +61,10 @@ def load_data():
 df_all = load_data()
 
 st.title("📊 SaleCycle レポートポータル")
-st.caption(f"データ取得元: {EXCEL_PATH}")
+st.caption(f"データ取得元: {CSV_PATH}")
 
 if df_all.empty:
-    st.error("データが見つかりません。salecycle_daily_report.xlsx を確認してください。")
+    st.error("データが見つかりません。salecycle_daily_report.csv を確認してください。")
     st.stop()
 
 all_clients = sorted(df_all[COL_CLIENT].unique().tolist())

@@ -102,13 +102,13 @@ with tab1:
             index=COL_CLIENT, columns=COL_DATE, values=COL_SENDS, aggfunc="sum"
         ).fillna(0).astype(int)
         pivot.columns = [c.strftime("%m/%d") for c in pivot.columns]
-        # 最新日の送付件数順でソート
+        # 最新日の送付件数順でソート・新しい日付を左に並べる
         latest_col = pivot.columns[-1]
         pivot = pivot.sort_values(latest_col, ascending=False)
-        pivot = pivot.reset_index()
+        pivot = pivot[pivot.columns[::-1]]  # 日付を新しい順（左）に並べる
 
-        col_cfg_t1 = {c: st.column_config.NumberColumn(c, format="%d") for c in pivot.columns if c != COL_CLIENT}
-        st.dataframe(pivot, use_container_width=True, hide_index=True, column_config=col_cfg_t1)
+        col_cfg_t1 = {c: st.column_config.NumberColumn(c, format="%d") for c in pivot.columns}
+        st.dataframe(pivot, use_container_width=True, hide_index=False, column_config=col_cfg_t1)
         st.divider()
 
 

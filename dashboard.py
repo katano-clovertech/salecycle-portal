@@ -109,6 +109,24 @@ with tab1:
 
         col_cfg_t1 = {c: st.column_config.NumberColumn(c, format="%d") for c in pivot.columns}
         st.dataframe(pivot, use_container_width=True, hide_index=False, column_config=col_cfg_t1)
+
+        # 過去1か月の送付数推移（折れ線グラフ）
+        cutoff = df_dash_t1[COL_DATE].max() - pd.Timedelta(days=30)
+        df_trend = df_dash_t1[df_dash_t1[COL_DATE] >= cutoff].groupby([COL_DATE, COL_CLIENT])[COL_SENDS].sum().reset_index()
+        if not df_trend.empty:
+            top_clients = df_trend.groupby(COL_CLIENT)[COL_SENDS].sum().nlargest(10).index.tolist()
+            df_trend_top = df_trend[df_trend[COL_CLIENT].isin(top_clients)]
+            fig_t1 = px.line(
+                df_trend_top, x=COL_DATE, y=COL_SENDS, color=COL_CLIENT,
+                title=f"{dash} - 過去1ヶ月 送付数推移",
+                color_discrete_sequence=px.colors.qualitative.Set2,
+            )
+            fig_t1.update_layout(
+                height=350, margin=dict(t=40, b=20, l=20, r=20),
+                legend=dict(orientation="h", y=-0.25),
+                xaxis_title="", yaxis_title="送付数",
+            )
+            st.plotly_chart(fig_t1, use_container_width=True)
         st.divider()
 
 

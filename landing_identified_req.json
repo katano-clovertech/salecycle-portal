@@ -1,0 +1,27 @@
+{
+  "plain_queries": [],
+  "saved_queries": [
+    {
+      "element_id": "ba8b76b8074b48404233d49af6be9504",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "new_business_aggregates.time_slice": "30 day ago for 30 day",
+          "new_business_aggregates.date_granularity": "Day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1230"
+    }
+  ],
+  "context": {
+    "id": "new_business_aggregates::msc_client_landing_page",
+    "type": "dashboard",
+    "session_id": "pJ1IRh6lpTx4rUtS5PlXzL"
+  }
+}

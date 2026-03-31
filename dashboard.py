@@ -18,6 +18,7 @@ COL_SENDS  = "送付件数"
 COL_OPENS  = "開封数"
 COL_CLICKS = "クリック数"
 COL_CVS    = "コンバージョン数"
+COL_VIS    = "識別数"
 
 DASH_ORDER  = ["Basket", "Browse", "Display"]
 DASH_COLORS = {"Basket": "#4A90D9", "Browse": "#27AE60", "Display": "#E67E22"}
@@ -51,10 +52,15 @@ def load_data():
     df[COL_OPENS]  = pd.to_numeric(df[COL_OPENS],  errors="coerce").fillna(0)
     df[COL_CLICKS] = pd.to_numeric(df[COL_CLICKS], errors="coerce").fillna(0)
     df[COL_CVS]    = pd.to_numeric(df[COL_CVS],    errors="coerce").fillna(0)
+    if COL_VIS in df.columns:
+        df[COL_VIS] = pd.to_numeric(df[COL_VIS], errors="coerce").fillna(0)
+    else:
+        df[COL_VIS] = 0
     df["年月"]      = df[COL_DATE].dt.to_period("M").astype(str)
     df["開封率"]    = df.apply(lambda r: r[COL_OPENS]  / r[COL_SENDS] * 100 if r[COL_SENDS] > 0 else 0, axis=1)
     df["クリック率"]= df.apply(lambda r: r[COL_CLICKS] / r[COL_SENDS] * 100 if r[COL_SENDS] > 0 else 0, axis=1)
     df["CVR"]       = df.apply(lambda r: r[COL_CVS]    / r[COL_SENDS] * 100 if r[COL_SENDS] > 0 else 0, axis=1)
+    df["送付率"]    = df.apply(lambda r: r[COL_SENDS]  / r[COL_VIS]   * 100 if r[COL_VIS]   > 0 else 0, axis=1)
     return df
 
 
@@ -201,24 +207,33 @@ with tab2:
             開封数=(COL_OPENS, "sum"),
             クリック数=(COL_CLICKS, "sum"),
             CV数=(COL_CVS, "sum"),
+            識別数=(COL_VIS, "sum"),
         ).reset_index().sort_values("送付件数", ascending=False)
 
         if dash != "Display":
             tbl["開封率"] = tbl.apply(
                 lambda r: f"{r['開封数']/r['送付件数']*100:.1f}%" if r["送付件数"] > 0 else "-", axis=1)
+        tbl["クリック率"] = tbl.apply(
+            lambda r: f"{r['クリック数']/r['送付件数']*100:.1f}%" if r["送付件数"] > 0 else "-", axis=1)
         tbl["CVR"] = tbl.apply(
             lambda r: f"{r['CV数']/r['送付件数']*100:.2f}%" if r["送付件数"] > 0 else "-", axis=1)
+        if dash in ("Basket", "Browse"):
+            tbl["送付率"] = tbl.apply(
+                lambda r: f"{r['送付件数']/r['識別数']*100:.1f}%" if r["識別数"] > 0 else "-", axis=1)
 
         show_cols = [COL_CLIENT, "送付件数"]
+        if dash in ("Basket", "Browse"):
+            show_cols += ["識別数", "送付率"]
         if dash != "Display":
             show_cols += ["開封数", "開封率"]
-        show_cols += ["クリック数", "CV数", "CVR"]
+        show_cols += ["クリック数", "クリック率", "CV数", "CVR"]
 
         st.dataframe(
             tbl[show_cols].reset_index(drop=True),
             use_container_width=True, hide_index=True,
             column_config={
                 "送付件数":  st.column_config.NumberColumn("送付",  format="%d"),
+                "識別数":    st.column_config.NumberColumn("識別",  format="%d"),
                 "開封数":    st.column_config.NumberColumn("開封",  format="%d"),
                 "クリック数":st.column_config.NumberColumn("Click", format="%d"),
                 "CV数":      st.column_config.NumberColumn("CV",    format="%d"),
@@ -296,6 +311,7 @@ with tab3:
             開封数=(COL_OPENS, "sum"),
             クリック数=(COL_CLICKS, "sum"),
             CV数=(COL_CVS, "sum"),
+            識別数=(COL_VIS, "sum"),
         ).reset_index().sort_values("送付件数", ascending=False)
 
         # 前月
@@ -312,20 +328,28 @@ with tab3:
         if dash != "Display":
             agg_m["開封率"] = agg_m.apply(
                 lambda r: f"{r['開封数']/r['送付件数']*100:.1f}%" if r["送付件数"] > 0 else "-", axis=1)
+        agg_m["クリック率"] = agg_m.apply(
+            lambda r: f"{r['クリック数']/r['送付件数']*100:.1f}%" if r["送付件数"] > 0 else "-", axis=1)
         agg_m["CVR"] = agg_m.apply(
             lambda r: f"{r['CV数']/r['送付件数']*100:.2f}%" if r["送付件数"] > 0 else "-", axis=1)
+        if dash in ("Basket", "Browse"):
+            agg_m["送付率"] = agg_m.apply(
+                lambda r: f"{r['送付件数']/r['識別数']*100:.1f}%" if r["識別数"] > 0 else "-", axis=1)
 
         # ── 表（全幅）──
         show_cols_m = [COL_CLIENT, "送付件数", "前月送付", "前月比"]
+        if dash in ("Basket", "Browse"):
+            show_cols_m += ["識別数", "送付率"]
         if dash != "Display":
             show_cols_m += ["開封数", "開封率"]
-        show_cols_m += ["クリック数", "CV数", "CVR"]
+        show_cols_m += ["クリック数", "クリック率", "CV数", "CVR"]
         st.dataframe(
             agg_m[show_cols_m].reset_index(drop=True),
             use_container_width=True, hide_index=True,
             column_config={
                 "送付件数":  st.column_config.NumberColumn("今月送付", format="%d"),
                 "前月送付":  st.column_config.NumberColumn("前月送付", format="%d"),
+                "識別数":    st.column_config.NumberColumn("識別",    format="%d"),
                 "開封数":    st.column_config.NumberColumn("開封",    format="%d"),
                 "クリック数":st.column_config.NumberColumn("Click",   format="%d"),
                 "CV数":      st.column_config.NumberColumn("CV",      format="%d"),

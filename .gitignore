@@ -1,0 +1,27 @@
+# 認証情報・設定ファイル
+run_daily.bat
+run_startup.bat
+run_backfill.bat
+run_backfill.ps1
+salecycle動作確認.xlsx
+salecycle_daily_report_backup*.xlsx
+salecycle_daily_report.xlsx
+
+# ログ・一時ファイル
+*.log
+nohup.out
+__pycache__/
+*.pyc
+.env
+
+# スクリーンショット・デバッグ
+ss_*.png
+screenshot_*.png
+stream_raw.txt
+api_response.txt
+*.json
+debug_*.py
+test_*.py
+validate_*.py
+open_dashboard.bat
+capture_templates.py

@@ -47,7 +47,7 @@ def load_data():
     if not os.path.exists(CSV_PATH):
         return pd.DataFrame()
     df = pd.read_csv(CSV_PATH, encoding="utf-8-sig")
-    df[COL_DATE]   = pd.to_datetime(df[COL_DATE])
+    df[COL_DATE]   = pd.to_datetime(df[COL_DATE], format="mixed")
     df[COL_SENDS]  = pd.to_numeric(df[COL_SENDS],  errors="coerce").fillna(0)
     df[COL_OPENS]  = pd.to_numeric(df[COL_OPENS],  errors="coerce").fillna(0)
     df[COL_CLICKS] = pd.to_numeric(df[COL_CLICKS], errors="coerce").fillna(0)

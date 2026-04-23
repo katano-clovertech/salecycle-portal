@@ -208,7 +208,8 @@ def fetch_metrics_for_client(session, headers, base_body, client_name, dashboard
 
     import copy
     modified_body = copy.deepcopy(base_body)
-    modified_body["options"]["force_run"] = True
+    if "options" in modified_body:
+        modified_body["options"]["force_run"] = True
 
     # Filter to only the element with date-based sorts (main metrics chart)
     all_sqs = modified_body.get("saved_queries", [])
@@ -443,7 +444,9 @@ def send_slack_report(alerts, results, report_date):
     if alerts:
         lines.append(f":warning: *\u30a2\u30e9\u30fc\u30c8 {len(alerts)}\u4ef6:*")
         for a in alerts:
-            if a["reason"] == "zero":
+            if a["reason"] == "fetch_failed":
+                lines.append(f"- {a['client']} [{a['dashboard']}]: :x: *データ取得失敗* \uff08\u524d\u65e5: {a['prev']:,}\u4ef6\uff09")
+            elif a["reason"] == "zero":
                 lines.append(f"- {a['client']} [{a['dashboard']}]: *0\u4ef6* \uff08\u524d\u65e5: {a['prev']:,}\u4ef6\uff09")
             else:
                 lines.append(
@@ -476,13 +479,22 @@ def check_sends_alerts(results, report_date):
 
     for item in results:
         today_sends = item.get("sends")
-        if not isinstance(today_sends, (int, float)):
-            continue
-        today_sends = int(today_sends)
-
         label = dashboard_labels.get(item["dashboard"], item["dashboard"])
         key = (item["client"], label)
         prev = prev_sends.get(key)
+
+        if today_sends == "" or today_sends is None:
+            # 取得失敗
+            alerts.append({
+                "client": item["client"], "dashboard": label,
+                "today": None, "prev": prev if prev is not None else 0,
+                "reason": "fetch_failed", "change_pct": None,
+            })
+            continue
+
+        if not isinstance(today_sends, (int, float)):
+            continue
+        today_sends = int(today_sends)
 
         if today_sends == 0:
             alerts.append({
@@ -502,7 +514,12 @@ def check_sends_alerts(results, report_date):
     if alerts:
         print(f"\nSlack\u30a2\u30e9\u30fc\u30c8\u5bfe\u8c61: {len(alerts)} \u4ef6")
         for a in alerts:
-            reason = "0\u4ef6" if a["reason"] == "zero" else f"{a['change_pct']:+.1f}%"
+            if a["reason"] == "fetch_failed":
+                reason = "取得失敗"
+            elif a["reason"] == "zero":
+                reason = "0件"
+            else:
+                reason = f"{a['change_pct']:+.1f}%"
             print(f"  {a['client']} [{a['dashboard']}]: {reason}")
     else:
         print("\nSlack\u30a2\u30e9\u30fc\u30c8: \u7570\u5e38\u306a\u3057")
@@ -732,7 +749,7 @@ def startup_backfill():
     """起動時バックフィルモード: 過去7日間の欠損データを補完する"""
     print("=== Startup Backfill Mode ===")
 
-    missing = find_missing_dates(days_back=7)
+    missing = find_missing_dates(days_back=14)
     if not missing:
         print("欠損データなし - バックフィル不要")
         return

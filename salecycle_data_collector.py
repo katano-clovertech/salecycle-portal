@@ -42,21 +42,21 @@ METRIC_FIELDS = {
         "opens": "campaign_aggregates.m_opens",
         "clicks": "campaign_aggregates.m_clicks",
         "conversions": "campaign_aggregates.m_dispatch_conversions",
-        "revenue": "campaign_aggregates.m_dispatch_revenue",
+        "revenue": "campaign_aggregates.m_dispatch_conversion_value",
     },
     "browse": {
         "sends": "campaign_aggregates.m_sends",
         "opens": "campaign_aggregates.m_opens",
         "clicks": "campaign_aggregates.m_clicks",
         "conversions": "campaign_aggregates.m_dispatch_conversions",
-        "revenue": "campaign_aggregates.m_dispatch_revenue",
+        "revenue": "campaign_aggregates.m_dispatch_conversion_value",
     },
     "display": {
         "sends": "campaign_aggregates.m_displays",
         "opens": None,
         "clicks": "campaign_aggregates.m_display_clicks",
         "conversions": "campaign_aggregates.m_display_conversions",
-        "revenue": "campaign_aggregates.m_display_revenue",
+        "revenue": "campaign_aggregates.m_display_conversion_value",
     },
 }
 

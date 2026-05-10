@@ -33,7 +33,6 @@ DASHBOARD_URLS = {
     "basket": f"{MY_SALECYCLE_BASE}/dashboard/new_business_aggregates::basket_abandonment__campaign_aggregates",
     "browse": f"{MY_SALECYCLE_BASE}/dashboard/new_business_aggregates::browse_abandonment__campaign_aggregates",
     "display": f"{MY_SALECYCLE_BASE}/dashboard/new_business_aggregates::display_only__campaign_aggregates",
-    "landing": f"{MY_SALECYCLE_BASE}/dashboard/new_business_aggregates::msc_client_landing_page",
 }
 
 # Metric fields in query results
@@ -43,24 +42,21 @@ METRIC_FIELDS = {
         "opens": "campaign_aggregates.m_opens",
         "clicks": "campaign_aggregates.m_clicks",
         "conversions": "campaign_aggregates.m_dispatch_conversions",
+        "revenue": "campaign_aggregates.m_dispatch_revenue",
     },
     "browse": {
         "sends": "campaign_aggregates.m_sends",
         "opens": "campaign_aggregates.m_opens",
         "clicks": "campaign_aggregates.m_clicks",
         "conversions": "campaign_aggregates.m_dispatch_conversions",
+        "revenue": "campaign_aggregates.m_dispatch_revenue",
     },
     "display": {
         "sends": "campaign_aggregates.m_displays",
         "opens": None,
         "clicks": "campaign_aggregates.m_display_clicks",
         "conversions": "campaign_aggregates.m_display_conversions",
-    },
-    "landing": {
-        "abandoned": "new_business_aggregates.m_abandoned_sessions_identified",
-        "browse_id": "new_business_aggregates.m_browse_sessions_identified",
-        "bounce":    "new_business_aggregates.m_bounce_sessions_identified",
-        "purchased": "new_business_aggregates.m_purchased_sessions_identified",
+        "revenue": "campaign_aggregates.m_display_revenue",
     },
 }
 
@@ -112,6 +108,7 @@ def capture_all_templates(context, page, needed_dashboards):
                     print(f"  Captured {dtype} template (ctx={ctx})")
         except Exception as e:
             print(f"  [qm] error: {e}")
+
 
     context.on("request", on_request)
 
@@ -342,7 +339,7 @@ def save_to_excel(results, report_date):
         wb = Workbook()
         ws = wb.active
         ws.title = "Daily Report"
-        headers = ["日付", "クライアント", "ダッシュボード種別", "送付件数", "開封数", "クリック数", "コンバージョン数", "識別数"]
+        headers = ["日付", "クライアント", "ダッシュボード種別", "送付件数", "開封数", "クリック数", "コンバージョン数", "コンバージョン金額"]
         for col, h in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col, value=h)
             cell.fill = PatternFill("solid", start_color="1F4E79")
@@ -367,7 +364,7 @@ def save_to_excel(results, report_date):
             item.get("opens", "") if item.get("opens") is not None else "",
             item.get("clicks", 0),
             item.get("conversions", 0),
-            item.get("visitors_identified", ""),
+            item.get("revenue", ""),
         ]
         for col, val in enumerate(row_data, 1):
             cell = ws.cell(row=next_row, column=col, value=val)
@@ -565,7 +562,7 @@ def load_templates_from_files():
     templates = {}
     script_dir = os.path.dirname(os.path.abspath(__file__))
     for dtype, fname in [("basket", "basket_req.json"), ("browse", "browse_req.json"),
-                         ("display", "display_req.json"), ("landing", "landing_identified_req.json")]:
+                         ("display", "display_req.json")]:
         path = os.path.join(script_dir, fname)
         if os.path.exists(path):
             with open(path, encoding="utf-8") as f:
@@ -628,20 +625,9 @@ def collect_for_date(session, headers, templates, clients, report_date, days_ago
     print(f"\n--- Collecting: {report_date} (filter: {DATE_RANGE}) ---")
 
     results = []
-    landing_template = templates.get("landing")
     for client in clients:
         client_name = client["name"]
         print(f"\n  {client_name}:")
-
-        # Landing: Visitors Identified (abandoned + browse_id per client)
-        visitors_abandoned = 0
-        visitors_browse = 0
-        if landing_template:
-            lm = fetch_metrics_for_client(session, headers, landing_template, client_name, "landing")
-            if lm:
-                visitors_abandoned = int(lm.get("abandoned", 0) or 0)
-                visitors_browse    = int(lm.get("browse_id", 0) or 0)
-                print(f"    landing: Abandoned={visitors_abandoned}, Browse={visitors_browse}")
 
         for dash_type in client["dashboards"]:
             template = templates.get(dash_type)
@@ -651,13 +637,7 @@ def collect_for_date(session, headers, templates, clients, report_date, days_ago
 
             metrics = fetch_metrics_for_client(session, headers, template, client_name, dash_type)
             if metrics:
-                # 送付率/クリック率用: Basket→abandoned識別数, Browse→browse識別数
-                if dash_type == "basket":
-                    visitors_id = visitors_abandoned
-                elif dash_type == "browse":
-                    visitors_id = visitors_browse
-                else:
-                    visitors_id = ""
+                revenue_val = metrics.get("revenue")
                 result = {
                     "client": client_name,
                     "dashboard": dash_type,
@@ -665,10 +645,10 @@ def collect_for_date(session, headers, templates, clients, report_date, days_ago
                     "opens": int(metrics.get("opens", 0)) if metrics.get("opens") is not None else "",
                     "clicks": int(metrics.get("clicks", 0)),
                     "conversions": int(metrics.get("conversions", 0)),
-                    "visitors_identified": visitors_id,
+                    "revenue": int(revenue_val) if isinstance(revenue_val, (int, float)) and revenue_val else "",
                 }
                 results.append(result)
-                print(f"    {dash_type}: Sends={result['sends']}, Opens={result['opens']}, Clicks={result['clicks']}, Conv={result['conversions']}, Visitors={visitors_id}")
+                print(f"    {dash_type}: Sends={result['sends']}, Opens={result['opens']}, Clicks={result['clicks']}, Conv={result['conversions']}, Revenue={result['revenue']}")
             else:
                 print(f"    {dash_type}: failed to get data")
                 results.append({
@@ -678,7 +658,7 @@ def collect_for_date(session, headers, templates, clients, report_date, days_ago
                     "opens": "",
                     "clicks": "",
                     "conversions": "",
-                    "visitors_identified": "",
+                    "revenue": "",
                 })
 
     save_to_excel(results, report_date)

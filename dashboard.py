@@ -18,7 +18,7 @@ COL_SENDS  = "送付件数"
 COL_OPENS  = "開封数"
 COL_CLICKS = "クリック数"
 COL_CVS    = "コンバージョン数"
-COL_VIS    = "識別数"
+COL_REV    = "コンバージョン金額"
 
 DASH_ORDER  = ["Basket", "Browse", "Display"]
 DASH_COLORS = {"Basket": "#4A90D9", "Browse": "#27AE60", "Display": "#E67E22"}
@@ -52,15 +52,14 @@ def load_data():
     df[COL_OPENS]  = pd.to_numeric(df[COL_OPENS],  errors="coerce").fillna(0)
     df[COL_CLICKS] = pd.to_numeric(df[COL_CLICKS], errors="coerce").fillna(0)
     df[COL_CVS]    = pd.to_numeric(df[COL_CVS],    errors="coerce").fillna(0)
-    if COL_VIS in df.columns:
-        df[COL_VIS] = pd.to_numeric(df[COL_VIS], errors="coerce").fillna(0)
+    if COL_REV in df.columns:
+        df[COL_REV] = pd.to_numeric(df[COL_REV], errors="coerce").fillna(0)
     else:
-        df[COL_VIS] = 0
+        df[COL_REV] = 0
     df["年月"]      = df[COL_DATE].dt.to_period("M").astype(str)
     df["開封率"]    = df.apply(lambda r: r[COL_OPENS]  / r[COL_SENDS] * 100 if r[COL_SENDS] > 0 else 0, axis=1)
     df["クリック率"]= df.apply(lambda r: r[COL_CLICKS] / r[COL_SENDS] * 100 if r[COL_SENDS] > 0 else 0, axis=1)
     df["CVR"]       = df.apply(lambda r: r[COL_CVS]    / r[COL_SENDS] * 100 if r[COL_SENDS] > 0 else 0, axis=1)
-    df["送付率"]    = df.apply(lambda r: r[COL_SENDS]  / r[COL_VIS]   * 100 if r[COL_VIS]   > 0 else 0, axis=1)
     return df
 
 
@@ -207,7 +206,7 @@ with tab2:
             開封数=(COL_OPENS, "sum"),
             クリック数=(COL_CLICKS, "sum"),
             CV数=(COL_CVS, "sum"),
-            識別数=(COL_VIS, "sum"),
+            コンバージョン金額=(COL_REV, "sum"),
         ).reset_index().sort_values("送付件数", ascending=False)
 
         if dash != "Display":
@@ -217,26 +216,21 @@ with tab2:
             lambda r: f"{r['クリック数']/r['送付件数']*100:.1f}%" if r["送付件数"] > 0 else "-", axis=1)
         tbl["CVR"] = tbl.apply(
             lambda r: f"{r['CV数']/r['送付件数']*100:.2f}%" if r["送付件数"] > 0 else "-", axis=1)
-        if dash in ("Basket", "Browse"):
-            tbl["送付率"] = tbl.apply(
-                lambda r: f"{r['送付件数']/r['識別数']*100:.1f}%" if r["識別数"] > 0 else "-", axis=1)
 
         show_cols = [COL_CLIENT, "送付件数"]
-        if dash in ("Basket", "Browse"):
-            show_cols += ["識別数", "送付率"]
         if dash != "Display":
             show_cols += ["開封数", "開封率"]
-        show_cols += ["クリック数", "クリック率", "CV数", "CVR"]
+        show_cols += ["クリック数", "クリック率", "CV数", "CVR", "コンバージョン金額"]
 
         st.dataframe(
             tbl[show_cols].reset_index(drop=True),
             use_container_width=True, hide_index=True,
             column_config={
-                "送付件数":  st.column_config.NumberColumn("送付",  format="%d"),
-                "識別数":    st.column_config.NumberColumn("識別",  format="%d"),
-                "開封数":    st.column_config.NumberColumn("開封",  format="%d"),
-                "クリック数":st.column_config.NumberColumn("Click", format="%d"),
-                "CV数":      st.column_config.NumberColumn("CV",    format="%d"),
+                "送付件数":       st.column_config.NumberColumn("送付",          format="%d"),
+                "開封数":         st.column_config.NumberColumn("開封",          format="%d"),
+                "クリック数":     st.column_config.NumberColumn("Click",         format="%d"),
+                "CV数":           st.column_config.NumberColumn("CV",            format="%d"),
+                "コンバージョン金額": st.column_config.NumberColumn("CV金額(JPY)", format="%d"),
             }
         )
 
@@ -286,15 +280,17 @@ with tab3:
     def delta(cur, prev):
         return f"{(cur - prev) / prev * 100:+.1f}%" if prev > 0 else None
 
-    km1, km2, km3, km4 = st.columns(4)
+    km1, km2, km3, km4, km5 = st.columns(5)
     cs = int(df_m[COL_SENDS].sum());  ps = int(df_pm[COL_SENDS].sum())
     co = int(df_m[COL_OPENS].sum());  po = int(df_pm[COL_OPENS].sum())
     cc = int(df_m[COL_CLICKS].sum()); pc = int(df_pm[COL_CLICKS].sum())
     cv = int(df_m[COL_CVS].sum());    pv = int(df_pm[COL_CVS].sum())
+    cr = int(df_m[COL_REV].sum());    pr = int(df_pm[COL_REV].sum())
     km1.metric("合計送付件数",   f"{cs:,}", delta(cs, ps))
     km2.metric("合計開封数",     f"{co:,}", delta(co, po))
     km3.metric("合計クリック数", f"{cc:,}", delta(cc, pc))
     km4.metric("合計CV数",       f"{cv:,}", delta(cv, pv))
+    km5.metric("合計CV金額",     f"¥{cr:,}", delta(cr, pr))
     st.divider()
 
     # Basket / Browse / Display ブロック
@@ -311,7 +307,7 @@ with tab3:
             開封数=(COL_OPENS, "sum"),
             クリック数=(COL_CLICKS, "sum"),
             CV数=(COL_CVS, "sum"),
-            識別数=(COL_VIS, "sum"),
+            コンバージョン金額=(COL_REV, "sum"),
         ).reset_index().sort_values("送付件数", ascending=False)
 
         # 前月
@@ -332,27 +328,22 @@ with tab3:
             lambda r: f"{r['クリック数']/r['送付件数']*100:.1f}%" if r["送付件数"] > 0 else "-", axis=1)
         agg_m["CVR"] = agg_m.apply(
             lambda r: f"{r['CV数']/r['送付件数']*100:.2f}%" if r["送付件数"] > 0 else "-", axis=1)
-        if dash in ("Basket", "Browse"):
-            agg_m["送付率"] = agg_m.apply(
-                lambda r: f"{r['送付件数']/r['識別数']*100:.1f}%" if r["識別数"] > 0 else "-", axis=1)
 
         # ── 表（全幅）──
         show_cols_m = [COL_CLIENT, "送付件数", "前月送付", "前月比"]
-        if dash in ("Basket", "Browse"):
-            show_cols_m += ["識別数", "送付率"]
         if dash != "Display":
             show_cols_m += ["開封数", "開封率"]
-        show_cols_m += ["クリック数", "クリック率", "CV数", "CVR"]
+        show_cols_m += ["クリック数", "クリック率", "CV数", "CVR", "コンバージョン金額"]
         st.dataframe(
             agg_m[show_cols_m].reset_index(drop=True),
             use_container_width=True, hide_index=True,
             column_config={
-                "送付件数":  st.column_config.NumberColumn("今月送付", format="%d"),
-                "前月送付":  st.column_config.NumberColumn("前月送付", format="%d"),
-                "識別数":    st.column_config.NumberColumn("識別",    format="%d"),
-                "開封数":    st.column_config.NumberColumn("開封",    format="%d"),
-                "クリック数":st.column_config.NumberColumn("Click",   format="%d"),
-                "CV数":      st.column_config.NumberColumn("CV",      format="%d"),
+                "送付件数":       st.column_config.NumberColumn("今月送付",      format="%d"),
+                "前月送付":       st.column_config.NumberColumn("前月送付",      format="%d"),
+                "開封数":         st.column_config.NumberColumn("開封",          format="%d"),
+                "クリック数":     st.column_config.NumberColumn("Click",         format="%d"),
+                "CV数":           st.column_config.NumberColumn("CV",            format="%d"),
+                "コンバージョン金額": st.column_config.NumberColumn("CV金額(JPY)", format="%d"),
             }
         )
 

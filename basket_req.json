@@ -1,0 +1,314 @@
+{
+  "plain_queries": [],
+  "saved_queries": [
+    {
+      "element_id": "87b9533ccfeb3586fa302f76a2fb6357",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1355"
+    },
+    {
+      "element_id": "42dd1cf314da42c37397822e06625f95",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "campaigns.campaign_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1356"
+    },
+    {
+      "element_id": "bbf114bab5c659980b89fb94d2b97444",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "campaigns.campaign_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1357"
+    },
+    {
+      "element_id": "efb33cf1ab37ba41e8bdcc530a966b7e",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "campaigns.campaign_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1358"
+    },
+    {
+      "element_id": "0580b27337e9d43cb1c8ee82aaccf9e5",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "campaigns.campaign_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1359"
+    },
+    {
+      "element_id": "628cedf862f28aa81f544a041b400e38",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "campaigns.campaign_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1360"
+    },
+    {
+      "element_id": "076f2de9ecfa1d36fd06e701f96e9668",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "campaigns.campaign_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1361"
+    },
+    {
+      "element_id": "17682273fc7c111e4227642de77db284",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "campaigns.campaign_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1362"
+    },
+    {
+      "element_id": "87b305d0bd8dbbb4958b4ef1e25681c7",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1363"
+    },
+    {
+      "element_id": "589af016437579593324693afd0692f4",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1364"
+    },
+    {
+      "element_id": "f56227263f78cf2864cb260e8cca92cb",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1365"
+    },
+    {
+      "element_id": "7ead9f484ba71067ab0fa878c9007bc2",
+      "filters": [
+        {
+          "new_clients.client_name": "",
+          "new_currency_exchange_rates.currency_exchange": "GBP",
+          "segments.segment_id_name": "",
+          "cycles.friendly_name": "",
+          "campaign_aggregates.feature": "cart abandonment",
+          "campaign_aggregates.date_granularity": "Week",
+          "campaign_aggregates.aggregate_level_selector": "",
+          "campaign_aggregates.channel": "",
+          "campaigns.basket_abandonment_campaign_name_filter": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1366"
+    }
+  ],
+  "context": {
+    "id": "new_business_aggregates::basket_abandonment__campaign_aggregates",
+    "type": "dashboard",
+    "session_id": "NykfZRBvmANlWXypFziqwZ"
+  },
+  "options": {
+    "force_run": false,
+    "streaming": true,
+    "eager_poll": false,
+    "enable_phases": false
+  }
+}

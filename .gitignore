@@ -19,9 +19,6 @@ ss_*.png
 screenshot_*.png
 stream_raw.txt
 api_response.txt
-basket_req.json
-browse_req.json
-display_req.json
 landing_req.json
 query_data.json
 dashboard_def.json

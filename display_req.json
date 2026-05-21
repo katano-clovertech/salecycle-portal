@@ -1,0 +1,321 @@
+{
+  "plain_queries": [],
+  "saved_queries": [
+    {
+      "element_id": "07b983f542b4e404d6a9b8bd2bcdcfad",
+      "filters": [
+        {
+          "campaign_aggregates.feature": "display only",
+          "campaign_aggregates.channel": "display",
+          "campaigns.campaign_name": "",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1262"
+    },
+    {
+      "element_id": "65e897b0520bf90db36bfcf3581502b1",
+      "filters": [
+        {
+          "campaign_aggregates.feature": "display only",
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.m_display_conversion_value desc"
+      ],
+      "result_maker_id": "1264"
+    },
+    {
+      "element_id": "2a7e90a410ca8265c53dd3850b715c0f",
+      "filters": [
+        {
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.feature": "display only",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.onsite_aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1340"
+    },
+    {
+      "element_id": "038081050e24c055116e63d5f38bdc82",
+      "filters": [
+        {
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.feature": "display only",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.onsite_aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1341"
+    },
+    {
+      "element_id": "b66e0b517feedac5663a09a75a0ed97a",
+      "filters": [
+        {
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.feature": "display only",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.onsite_aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1342"
+    },
+    {
+      "element_id": "ecef049ab67fd78012e4e0416bc4d899",
+      "filters": [
+        {
+          "campaign_aggregates.feature": "display only",
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1275"
+    },
+    {
+      "element_id": "d8b0bfd350e88a0485339bd0b8bb82d1",
+      "filters": [
+        {
+          "campaign_aggregates.feature": "display only",
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1278"
+    },
+    {
+      "element_id": "97dd265d0622258b8f2949d90a67efe2",
+      "filters": [
+        {
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.feature": "display only",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1281"
+    },
+    {
+      "element_id": "f73ca9c834a66cda3e760cba6928a1c0",
+      "filters": [
+        {
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.channel": "display",
+          "campaign_aggregates.feature": "display only",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1284"
+    },
+    {
+      "element_id": "fb3d9f982de47a19724933a363d74b81",
+      "filters": [
+        {
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.feature": "display only",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [],
+      "result_maker_id": "1287"
+    },
+    {
+      "element_id": "05a9ef70d816e28bf1d550d370645eb5",
+      "filters": [
+        {
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.feature": "display only",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.onsite_aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1343"
+    },
+    {
+      "element_id": "3b5fc321525a1174bea4fe7e013dc8b1",
+      "filters": [
+        {
+          "campaigns.campaign_name": "",
+          "campaign_aggregates.feature": "display only",
+          "campaign_aggregates.channel": "display",
+          "new_clients.client_name": "",
+          "campaigns.dot_campaign_name_filter": "",
+          "campaign_aggregates.onsite_aggregate_level_selector": "",
+          "segments.segment_id_name": "",
+          "templates.template_name": "",
+          "campaign_aggregates.time_slice": "30 day ago for 30 day",
+          "campaign_aggregates.date_granularity": "Week",
+          "new_currency_exchange_rates.currency_exchange": "GBP"
+        }
+      ],
+      "generate_links": true,
+      "path_prefix": "/explore",
+      "server_table_calcs": false,
+      "source": "dashboard",
+      "sorts": [
+        "campaign_aggregates.onsite_aggregate_pivot",
+        "campaign_aggregates.date desc"
+      ],
+      "result_maker_id": "1344"
+    }
+  ],
+  "context": {
+    "id": "new_business_aggregates::display_only__campaign_aggregates",
+    "type": "dashboard",
+    "session_id": "uL8R6pQoqfvqXMp3PeaSpY"
+  },
+  "options": {
+    "force_run": false,
+    "streaming": true,
+    "eager_poll": false,
+    "enable_phases": false
+  }
+}

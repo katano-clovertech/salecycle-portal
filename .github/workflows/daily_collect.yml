@@ -37,11 +37,11 @@ jobs:
           HEADLESS: "1"
         run: python salecycle_data_collector.py
 
-      - name: Commit and push updated CSV/Excel
+      - name: Commit and push updated CSV
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add salecycle_daily_report.csv salecycle_daily_report.xlsx
+          git add salecycle_daily_report.csv
           git diff --cached --quiet && echo "No changes to commit" || (
             git commit -m "data: $(date -u +%Y-%m-%d)"
             git push

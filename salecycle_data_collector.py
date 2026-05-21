@@ -18,7 +18,8 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 EMAIL = os.environ.get("SALECYCLE_USER", "s.katano@clovertech.jp")
 PASSWORD = os.environ.get("SALECYCLE_PASS", "")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
-EXCEL_INPUT = os.path.join(os.path.dirname(__file__), "salecycle動作確認.xlsx")
+EXCEL_INPUT  = os.path.join(os.path.dirname(__file__), "salecycle動作確認.xlsx")
+CLIENTS_CSV  = os.path.join(os.path.dirname(__file__), "clients.csv")
 EXCEL_OUTPUT = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.xlsx")
 LOOKER_API_BASE = "https://looker-api.salecycle.com/api/internal"
 MY_SALECYCLE_BASE = "https://my.salecycle.com"
@@ -298,15 +299,36 @@ def fetch_metrics_for_client(session, headers, base_body, client_name, dashboard
 
 
 def read_clients_from_excel():
-    """Read client list from Excel file"""
-    df = pd.read_excel(EXCEL_INPUT, header=1)  # Row 1 is header (Client, Basket, Browse, Display)
+    """Read client list from clients.csv (preferred) or Excel file"""
+    # クラウド実行 or ローカルでCSVがあればCSVを使用
+    if os.path.exists(CLIENTS_CSV):
+        df = pd.read_csv(CLIENTS_CSV, encoding="utf-8-sig")
+        clients = []
+        for _, row in df.iterrows():
+            name = str(row["client_name"]).strip()
+            if not name or name == "nan":
+                continue
+            dashboards = []
+            if str(row.get("basket", "")).strip() == "1":
+                dashboards.append("basket")
+            if str(row.get("browse", "")).strip() == "1":
+                dashboards.append("browse")
+            if str(row.get("display", "")).strip() == "1":
+                dashboards.append("display")
+            if dashboards:
+                clients.append({"name": name, "dashboards": dashboards})
+        print(f"Loaded {len(clients)} clients from clients.csv")
+        return clients
+
+    # フォールバック: Excelから読み込み
+    df = pd.read_excel(EXCEL_INPUT, header=1)
     clients = []
     for _, row in df.iterrows():
         name = str(row.iloc[0]).strip()
         if not name or name == "nan" or name == "クライアント":
             continue
-        basket_url = str(row.iloc[1]).strip() if pd.notna(row.iloc[1]) else ""
-        browse_url = str(row.iloc[2]).strip() if pd.notna(row.iloc[2]) else ""
+        basket_url  = str(row.iloc[1]).strip() if pd.notna(row.iloc[1]) else ""
+        browse_url  = str(row.iloc[2]).strip() if pd.notna(row.iloc[2]) else ""
         display_url = str(row.iloc[3]).strip() if pd.notna(row.iloc[3]) else ""
 
         dashboards = []

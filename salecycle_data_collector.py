@@ -486,6 +486,7 @@ def send_slack_report(alerts, results, report_date):
 
     lines.append("")
     lines.append(f":open_file_folder: <{excel_link}|Excel\u30ec\u30dd\u30fc\u30c8\u3092\u958b\u304f>")
+    lines.append(f":bar_chart: <https://salecycle-portal.streamlit.app/|\u30dd\u30fc\u30bf\u30eb\u30b5\u30a4\u30c8\u3092\u958b\u304f>")
 
     payload = {"text": "\n".join(lines)}
     try:

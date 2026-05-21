@@ -383,17 +383,20 @@ def save_to_excel(results, report_date):
     wb.save(EXCEL_OUTPUT)
     print(f"Saved to {EXCEL_OUTPUT}")
 
-    # CSVにも保存してGitHubにpush
+    # CSVに保存（GitHub Actionsの場合はpushをスキップ、ワークフロー側でcommit/push）
     try:
         import pandas as _pd, subprocess as _sp
         _csv_path = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.csv")
         _df = _pd.read_excel(EXCEL_OUTPUT, engine="openpyxl")
         _df.to_csv(_csv_path, index=False, encoding="utf-8-sig")
-        _repo = os.path.dirname(__file__)
-        _sp.run(["git", "-C", _repo, "add", "salecycle_daily_report.csv"], check=True)
-        _sp.run(["git", "-C", _repo, "commit", "-m", f"data: {report_date}"], check=True)
-        _sp.run(["git", "-C", _repo, "push"], check=True)
-        print(f"CSV updated and pushed to GitHub ({report_date})")
+        print(f"CSV saved: {_csv_path}")
+        if os.environ.get("HEADLESS", "0") != "1":
+            # ローカル実行時のみgit push
+            _repo = os.path.dirname(__file__)
+            _sp.run(["git", "-C", _repo, "add", "salecycle_daily_report.csv"], check=True)
+            _sp.run(["git", "-C", _repo, "commit", "-m", f"data: {report_date}"], check=True)
+            _sp.run(["git", "-C", _repo, "push"], check=True)
+            print(f"CSV pushed to GitHub ({report_date})")
     except Exception as _e:
         print(f"CSV/GitHub push skipped: {_e}")
 
@@ -578,7 +581,9 @@ def get_looker_session():
     """ブラウザでログインしてLookerセッション（requests.Session, headers）を返す"""
     looker_cookies = {}
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, channel="chrome")
+        _headless = os.environ.get("HEADLESS", "0") == "1"
+        _channel  = None if _headless else "chrome"
+        browser = p.chromium.launch(headless=_headless, channel=_channel)
         context = browser.new_context()
         page = context.new_page()
 

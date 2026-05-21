@@ -1,0 +1,48 @@
+name: SaleCycle Daily Collect
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 毎日 07:00 UTC = 16:00 JST
+  workflow_dispatch:        # 手動実行ボタン（テスト用）
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install playwright openpyxl pandas requests
+
+      - name: Install Playwright Chromium
+        run: playwright install chromium --with-deps
+
+      - name: Run SaleCycle data collector
+        env:
+          SALECYCLE_USER: ${{ secrets.SALECYCLE_USER }}
+          SALECYCLE_PASS: ${{ secrets.SALECYCLE_PASS }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          HEADLESS: "1"
+        run: python salecycle_data_collector.py
+
+      - name: Commit and push updated CSV/Excel
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add salecycle_daily_report.csv salecycle_daily_report.xlsx
+          git diff --cached --quiet && echo "No changes to commit" || (
+            git commit -m "data: $(date -u +%Y-%m-%d)"
+            git push
+          )

@@ -309,11 +309,17 @@ def read_clients_from_excel():
             if not name or name == "nan":
                 continue
             dashboards = []
-            if str(row.get("basket", "")).strip() == "1":
+            def _has(col):
+                v = row.get(col)
+                try:
+                    return pd.notna(v) and float(v) == 1.0
+                except (ValueError, TypeError):
+                    return False
+            if _has("basket"):
                 dashboards.append("basket")
-            if str(row.get("browse", "")).strip() == "1":
+            if _has("browse"):
                 dashboards.append("browse")
-            if str(row.get("display", "")).strip() == "1":
+            if _has("display"):
                 dashboards.append("display")
             if dashboards:
                 clients.append({"name": name, "dashboards": dashboards})

@@ -411,22 +411,49 @@ def save_to_excel(results, report_date):
     wb.save(EXCEL_OUTPUT)
     print(f"Saved to {EXCEL_OUTPUT}")
 
-    # CSVに保存（GitHub Actionsの場合はpushをスキップ、ワークフロー側でcommit/push）
+    # CSVに保存
     try:
         import pandas as _pd, subprocess as _sp
         _csv_path = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.csv")
-        _df = _pd.read_excel(EXCEL_OUTPUT, engine="openpyxl")
-        _df.to_csv(_csv_path, index=False, encoding="utf-8-sig")
-        print(f"CSV saved: {_csv_path}")
-        if os.environ.get("HEADLESS", "0") != "1":
-            # ローカル実行時のみgit push
+
+        if os.environ.get("HEADLESS", "0") == "1":
+            # クラウド実行: 既存CSVに追記（Excelなしでも過去データを保持）
+            new_rows = []
+            for item in results:
+                _label = {"basket": "Basket", "browse": "Browse", "display": "Display"}.get(item["dashboard"], item["dashboard"])
+                new_rows.append({
+                    "日付": report_date,
+                    "クライアント": item["client"],
+                    "ダッシュボード種別": _label,
+                    "送付件数": item.get("sends", 0),
+                    "開封数": item.get("opens", ""),
+                    "クリック数": item.get("clicks", 0),
+                    "コンバージョン数": item.get("conversions", 0),
+                    "コンバージョン金額": item.get("revenue", ""),
+                })
+            if new_rows:
+                _new_df = _pd.DataFrame(new_rows)
+                if os.path.exists(_csv_path):
+                    _existing = _pd.read_csv(_csv_path, encoding="utf-8-sig")
+                    # 重複排除してマージ
+                    _combined = _pd.concat([_existing, _new_df], ignore_index=True)
+                    _combined = _combined.drop_duplicates(subset=["日付", "クライアント", "ダッシュボード種別"], keep="last")
+                else:
+                    _combined = _new_df
+                _combined.to_csv(_csv_path, index=False, encoding="utf-8-sig")
+                print(f"CSV updated (cloud): {len(_combined)} total rows")
+        else:
+            # ローカル実行: Excelから全データでCSV生成してgit push
+            _df = _pd.read_excel(EXCEL_OUTPUT, engine="openpyxl")
+            _df.to_csv(_csv_path, index=False, encoding="utf-8-sig")
+            print(f"CSV saved: {_csv_path}")
             _repo = os.path.dirname(__file__)
             _sp.run(["git", "-C", _repo, "add", "salecycle_daily_report.csv"], check=True)
             _sp.run(["git", "-C", _repo, "commit", "-m", f"data: {report_date}"], check=True)
             _sp.run(["git", "-C", _repo, "push"], check=True)
             print(f"CSV pushed to GitHub ({report_date})")
     except Exception as _e:
-        print(f"CSV/GitHub push skipped: {_e}")
+        print(f"CSV save error: {_e}")
 
 
 def get_previous_sends(report_date):

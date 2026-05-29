@@ -457,11 +457,30 @@ def save_to_excel(results, report_date):
 
 
 def get_previous_sends(report_date):
-    """Excelから report_date の前日の送付件数を {(client, dashboard_label): sends} で返す"""
+    """前日の送付件数を {(client, dashboard_label): sends} で返す。
+    クラウド実行はCSV、ローカル実行はExcelから読み込む。"""
     prev_date = (datetime.datetime.strptime(report_date, "%Y-%m-%d") - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
     prev_sends = {}
-    if not os.path.exists(EXCEL_OUTPUT):
+    _csv_path = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.csv")
+
+    # クラウド実行 or Excelがない場合はCSVから読む
+    if os.environ.get("HEADLESS", "0") == "1" or not os.path.exists(EXCEL_OUTPUT):
+        if os.path.exists(_csv_path):
+            try:
+                df = pd.read_csv(_csv_path, encoding="utf-8-sig")
+                prev_rows = df[df["日付"].astype(str) == prev_date]
+                for _, row in prev_rows.iterrows():
+                    key = (row["クライアント"], row["ダッシュボード種別"])
+                    sends = row["送付件数"]
+                    prev_sends[key] = sends if isinstance(sends, (int, float)) else 0
+                print(f"  [Slack] 前日データ({prev_date}): {len(prev_sends)}件 (CSV)")
+            except Exception as e:
+                print(f"  [Slack] 前日データ読み込みエラー(CSV): {e}")
+        else:
+            print(f"  [Slack] CSVが見つからないため前日比チェックをスキップ")
         return prev_sends
+
+    # ローカル実行: Excelから読む
     try:
         wb = load_workbook(EXCEL_OUTPUT, read_only=True)
         ws = wb.active
@@ -470,6 +489,7 @@ def get_previous_sends(report_date):
             if str(date_val) == prev_date and client and dashboard:
                 prev_sends[(client, dashboard)] = sends if isinstance(sends, (int, float)) else 0
         wb.close()
+        print(f"  [Slack] 前日データ({prev_date}): {len(prev_sends)}件 (Excel)")
     except Exception as e:
         print(f"  [Slack] 前日データ読み込みエラー: {e}")
     return prev_sends

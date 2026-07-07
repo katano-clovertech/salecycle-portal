@@ -516,6 +516,22 @@ def send_slack_report(alerts, results, report_date):
         "",
     ]
 
+    # アラート種別カウント
+    total_rows = len(results)
+    n_red    = sum(1 for a in alerts if a["reason"] in ("fetch_failed", "zero"))
+    n_yellow = sum(1 for a in alerts if a["reason"] == "drop" and a["change_pct"] <= -50)
+    n_green  = sum(1 for a in alerts if a["reason"] == "drop" and a["change_pct"] > -50)
+    n_white  = total_rows - len(alerts)
+
+    summary = (
+        f":red_circle: {n_red}件  "
+        f":large_yellow_circle: {n_yellow}件  "
+        f":large_green_circle: {n_green}件  "
+        f":white_circle: {n_white}件"
+    )
+    lines.append(summary)
+    lines.append("")
+
     if alerts:
         lines.append(f":warning: *アラート {len(alerts)}件:*")
         lines.append(":red_circle: 0件・取得失敗　:large_yellow_circle: 50%以上減　:large_green_circle: 20%以上減")

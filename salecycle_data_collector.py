@@ -517,19 +517,22 @@ def send_slack_report(alerts, results, report_date):
     ]
 
     if alerts:
-        lines.append(f":warning: *\u30a2\u30e9\u30fc\u30c8 {len(alerts)}\u4ef6:*")
+        lines.append(f":warning: *アラート {len(alerts)}件:*")
+        lines.append(":red_circle: 0件・取得失敗　:large_yellow_circle: 50%以上減　:large_green_circle: 20%以上減")
         for a in alerts:
             if a["reason"] == "fetch_failed":
-                lines.append(f"- {a['client']} [{a['dashboard']}]: :x: *データ取得失敗* \uff08\u524d\u65e5: {a['prev']:,}\u4ef6\uff09")
+                lines.append(f"- :red_circle: {a['client']} [{a['dashboard']}]: *データ取得失敗*（前日: {a['prev']:,}件）")
             elif a["reason"] == "zero":
-                lines.append(f"- {a['client']} [{a['dashboard']}]: *0\u4ef6* \uff08\u524d\u65e5: {a['prev']:,}\u4ef6\uff09")
+                lines.append(f"- :red_circle: {a['client']} [{a['dashboard']}]: *0件*（前日: {a['prev']:,}件）")
             else:
+                pct = a["change_pct"]
+                icon = ":large_yellow_circle:" if pct <= -50 else ":large_green_circle:"
                 lines.append(
-                    f"- {a['client']} [{a['dashboard']}]: {a['today']:,}\u4ef6 "
-                    f"\uff08\u524d\u65e5: {a['prev']:,}\u4ef6 / {a['change_pct']:+.1f}%\uff09"
+                    f"- {icon} {a['client']} [{a['dashboard']}]: {a['today']:,}件"
+                    f"（前日: {a['prev']:,}件 / {pct:+.1f}%）"
                 )
     else:
-        lines.append(":white_check_mark: \u7570\u5e38\u306a\u3057")
+        lines.append(":white_check_mark: 異常なし")
 
     lines.append("")
     lines.append(f":open_file_folder: <{excel_link}|Excel\u30ec\u30dd\u30fc\u30c8\u3092\u958b\u304f>")

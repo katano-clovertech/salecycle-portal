@@ -532,10 +532,17 @@ def send_slack_report(alerts, results, report_date):
     lines.append(summary)
     lines.append("")
 
+
     if alerts:
+        # 赤→黄→緑の順にソート
+        def _alert_order(a):
+            if a["reason"] in ("fetch_failed", "zero"): return 0
+            return 1 if a["change_pct"] <= -50 else 2
+        sorted_alerts = sorted(alerts, key=_alert_order)
+
         lines.append(f":warning: *アラート {len(alerts)}件:*")
         lines.append(":red_circle: 0件・取得失敗　:large_yellow_circle: 50%以上減　:large_green_circle: 20%以上減")
-        for a in alerts:
+        for a in sorted_alerts:
             if a["reason"] == "fetch_failed":
                 lines.append(f"- :red_circle: {a['client']} [{a['dashboard']}]: *データ取得失敗*（前日: {a['prev']:,}件）")
             elif a["reason"] == "zero":

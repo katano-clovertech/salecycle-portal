@@ -5442,33 +5442,66 @@
 2026-07-06,.K Online (6abd7),Basket,8,7,0,0,,
 2026-07-06,Activity - CN (2f8b2),Basket,1,1,1,0,,
 2026-07-06,Activity - EN (d6316),Basket,9,7,2,0,,
-2026-07-06,Activity - JP (fbd9e),Basket,892,554,67,27,,617915
-2026-07-06,Activity - JP (fbd9e),Browse,1237,565,45,8,,184591
+2026-07-06,Activity - JP (fbd9e),Basket,892,554,67,27,,617915.0
+2026-07-06,Activity - JP (fbd9e),Browse,1237,565,45,8,,184591.0
 2026-07-06,Activity - KO (27ade),Basket,1,2,0,0,,
 2026-07-06,Activity - TH (95a3a),Basket,0,0,0,0,,
-2026-07-06,Activity - TW (11be8),Basket,11,5,2,1,,10000
-2026-07-06,Atomicboxx (33a13),Basket,57,44,5,1,,25982
-2026-07-06,CAN ONLINE SHOP (8aebe),Basket,1748,882,128,28,,256575
-2026-07-06,CAN ONLINE SHOP (8aebe),Browse,6423,2253,330,29,,240669
-2026-07-06,Denham - Japan (5ed5f),Basket,37,11,5,3,,97240
-2026-07-06,Denham - Japan (5ed5f),Browse,173,105,14,1,,24640
-2026-07-06,Diptyque Paris JP (e8633),Basket,411,102,22,1,,9570
-2026-07-06,HIS Japan (caef0),Basket,145,99,21,9,,611965
-2026-07-06,Haruyama (b79a5),Basket,138,88,18,6,,86857
-2026-07-06,Haruyama (b79a5),Browse,78,31,10,2,,13900
-2026-07-06,Karrimor (JP) (73c71),Basket,76,46,12,2,,39550
-2026-07-06,Manara - main site (3ca7c),Basket,526,263,70,13,,102463
-2026-07-06,Oisix (c1da1),Basket,94,82,18,1,,1980
-2026-07-06,Oisix - Gift Shop (87a8d),Basket,83,49,13,1,,5378
-2026-07-06,Radishbo-ya (Clovertech) (a591c),Basket,2447,1069,217,30,,40960
-2026-07-06,Sanko Bazaar (ccf42),Basket,64,38,11,2,,18810
-2026-07-06,Sanko Bazaar (ccf42),Browse,314,185,18,3,,40744
-2026-07-06,Tea Life Japan (11b24),Basket,118,45,10,1,,1750
+2026-07-06,Activity - TW (11be8),Basket,11,5,2,1,,10000.0
+2026-07-06,Atomicboxx (33a13),Basket,57,44,5,1,,25982.0
+2026-07-06,CAN ONLINE SHOP (8aebe),Basket,1748,882,128,28,,256575.0
+2026-07-06,CAN ONLINE SHOP (8aebe),Browse,6423,2253,330,29,,240669.0
+2026-07-06,Denham - Japan (5ed5f),Basket,37,11,5,3,,97240.0
+2026-07-06,Denham - Japan (5ed5f),Browse,173,105,14,1,,24640.0
+2026-07-06,Diptyque Paris JP (e8633),Basket,411,102,22,1,,9570.0
+2026-07-06,HIS Japan (caef0),Basket,145,99,21,9,,611965.0
+2026-07-06,Haruyama (b79a5),Basket,138,88,18,6,,86857.0
+2026-07-06,Haruyama (b79a5),Browse,78,31,10,2,,13900.0
+2026-07-06,Karrimor (JP) (73c71),Basket,76,46,12,2,,39550.0
+2026-07-06,Manara - main site (3ca7c),Basket,526,263,70,13,,102463.0
+2026-07-06,Oisix (c1da1),Basket,94,82,18,1,,1980.0
+2026-07-06,Oisix - Gift Shop (87a8d),Basket,83,49,13,1,,5378.0
+2026-07-06,Radishbo-ya (Clovertech) (a591c),Basket,2447,1069,217,30,,40960.0
+2026-07-06,Sanko Bazaar (ccf42),Basket,64,38,11,2,,18810.0
+2026-07-06,Sanko Bazaar (ccf42),Browse,314,185,18,3,,40744.0
+2026-07-06,Tea Life Japan (11b24),Basket,118,45,10,1,,1750.0
 2026-07-06,Tea Life Japan (11b24),Browse,137,37,2,0,,
 2026-07-06,Tornadomart (JP) (547b9),Basket,11,6,2,0,,
-2026-07-06,MGH - HOTEL THE CELESTINE KYOTO GION (bee14),Display,20,0,2,2,,932478
-2026-07-06,MGH - Millennium Tokyo (23264),Display,18,0,3,3,,287304
-2026-07-06,MGH - Nagoya Premier   (8b1f2),Display,33,0,11,9,,378935
-2026-07-06,MGH - Otemachi (c873c),Display,7,0,2,2,,57000
-2026-07-06,MGH - Shiodome Italia-gai (a92d5),Display,18,0,4,4,,134559
-2026-07-06,MGH - Ueno (e90bf),Display,18,0,5,3,,105320
+2026-07-06,MGH - HOTEL THE CELESTINE KYOTO GION (bee14),Display,20,0,2,2,,932478.0
+2026-07-06,MGH - Millennium Tokyo (23264),Display,18,0,3,3,,287304.0
+2026-07-06,MGH - Nagoya Premier   (8b1f2),Display,33,0,11,9,,378935.0
+2026-07-06,MGH - Otemachi (c873c),Display,7,0,2,2,,57000.0
+2026-07-06,MGH - Shiodome Italia-gai (a92d5),Display,18,0,4,4,,134559.0
+2026-07-06,MGH - Ueno (e90bf),Display,18,0,5,3,,105320.0
+2026-07-07,.K Online (6abd7),Basket,11,7,7,1,,37730
+2026-07-07,Activity - CN (2f8b2),Basket,1,0,0,0,,
+2026-07-07,Activity - EN (d6316),Basket,9,7,1,0,,
+2026-07-07,Activity - JP (fbd9e),Basket,735,463,77,24,,556497
+2026-07-07,Activity - JP (fbd9e),Browse,1063,485,36,11,,148570
+2026-07-07,Activity - KO (27ade),Basket,3,1,1,0,,
+2026-07-07,Activity - TH (95a3a),Basket,0,0,0,0,,
+2026-07-07,Activity - TW (11be8),Basket,14,7,2,1,,15400
+2026-07-07,Atomicboxx (33a13),Basket,57,37,6,0,,
+2026-07-07,CAN ONLINE SHOP (8aebe),Basket,997,564,89,11,,64746
+2026-07-07,CAN ONLINE SHOP (8aebe),Browse,5424,2088,296,11,,74470
+2026-07-07,Denham - Japan (5ed5f),Basket,24,21,7,1,,12320
+2026-07-07,Denham - Japan (5ed5f),Browse,137,79,11,1,,34650
+2026-07-07,Diptyque Paris JP (e8633),Basket,359,92,15,4,,37620
+2026-07-07,HIS Japan (caef0),Basket,122,78,7,1,,42660
+2026-07-07,Haruyama (b79a5),Basket,120,58,15,2,,32080
+2026-07-07,Haruyama (b79a5),Browse,91,46,9,3,,20951
+2026-07-07,Karrimor (JP) (73c71),Basket,70,39,12,0,,
+2026-07-07,Manara - main site (3ca7c),Basket,529,284,61,17,,109984
+2026-07-07,Oisix (c1da1),Basket,570,204,44,4,,8920
+2026-07-07,Oisix - Gift Shop (87a8d),Basket,83,51,14,3,,20000
+2026-07-07,Radishbo-ya (Clovertech) (a591c),Basket,2457,1137,248,30,,46400
+2026-07-07,Sanko Bazaar (ccf42),Basket,48,29,8,2,,24222
+2026-07-07,Sanko Bazaar (ccf42),Browse,273,140,25,4,,81257
+2026-07-07,Tea Life Japan (11b24),Basket,116,58,8,0,,
+2026-07-07,Tea Life Japan (11b24),Browse,132,60,5,3,,19200
+2026-07-07,Tornadomart (JP) (547b9),Basket,15,5,2,0,,
+2026-07-07,MGH - HOTEL THE CELESTINE KYOTO GION (bee14),Display,42,0,9,1,,265160
+2026-07-07,MGH - Millennium Tokyo (23264),Display,12,0,3,2,,77530
+2026-07-07,MGH - Nagoya Premier   (8b1f2),Display,32,0,11,10,,797070
+2026-07-07,MGH - Otemachi (c873c),Display,8,0,2,1,,27820
+2026-07-07,MGH - Shiodome Italia-gai (a92d5),Display,13,0,2,1,,16000
+2026-07-07,MGH - Ueno (e90bf),Display,8,0,1,0,,

@@ -554,7 +554,21 @@ def send_slack_report(alerts, results, report_date):
                     f"- {icon} {a['client']} [{a['dashboard']}]: {a['today']:,}件"
                     f"（前日: {a['prev']:,}件 / {pct:+.1f}%）"
                 )
-    else:
+    # ⚪ 問題なし一覧
+    _dash_labels = {"basket": "Basket", "browse": "Browse", "display": "Display"}
+    alert_keys = {(a["client"], a["dashboard"]) for a in alerts}
+    white_items = [
+        item for item in results
+        if (item["client"], _dash_labels.get(item["dashboard"], item["dashboard"])) not in alert_keys
+        and isinstance(item.get("sends"), (int, float))
+    ]
+    if white_items:
+        lines.append(f":white_circle: *問題なし {len(white_items)}件:*")
+        for item in white_items:
+            label = _dash_labels.get(item["dashboard"], item["dashboard"])
+            sends = int(item["sends"])
+            lines.append(f"- :white_circle: {item['client']} [{label}]: {sends:,}件")
+    elif not alerts:
         lines.append(":white_check_mark: 異常なし")
 
     lines.append("")

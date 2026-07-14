@@ -1065,7 +1065,7 @@ def main():
 
 
 
-def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート"):
+def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート", raw_only=False):
     """CSVの全期間を週単位で集計してGoogle Sheetsに一括書き込み
     client_filter: Noneで全クライアント、文字列で部分一致フィルター
     sheet_name: 書き込み先シート名
@@ -1146,34 +1146,39 @@ def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート"):
                 t = "大幅改善" if d<=-2 else "改善" if d<=-0.5 else "ほぼ横ばい" if d<=0.5 else "微増" if d<=2 else "大幅悪化"
             return f"{d:+.2f}pt（{t}）"
 
-        header = [
-            "週",
-            "配信完了数", "開封数", "開封率(%)", "クリック数", "クリック率(%)",
-            "CV数", "CV金額(円)", "コスト(円)", "CPA(円)",
-            "配信起点CVR(%)", "クリック起点CVR(%)",
-            "送付数_先週比", "開封率_増減", "CR_増減", "CVR_増減",
-        ]
+        if raw_only:
+            header = ["週", "送付数", "開封数", "クリック数", "CV数", "CV金額(円)"]
+        else:
+            header = [
+                "週",
+                "配信完了数", "開封数", "開封率(%)", "クリック数", "クリック率(%)",
+                "CV数", "CV金額(円)", "コスト(円)", "CPA(円)",
+                "配信起点CVR(%)", "クリック起点CVR(%)",
+                "送付数_先週比", "開封率_増減", "CR_増減", "CVR_増減",
+            ]
         all_rows = [header]
         prev_kpi = None
         for monday in mondays:
             sunday = monday + datetime.timedelta(days=6)
             kw = get_kpi(monday, sunday)
-            wl = f"{monday.strftime('%Y/%m/%d')}~{sunday.strftime('%Y/%m/%d')}"
-            row = [
-                wl,
-                kw["sends"], kw["opens"], round(kw["open_rate"], 1),
-                kw["clicks"], round(kw["click_rate"], 1),
-                kw["cvs"], kw["rev"], round(kw["cost"]), round(kw["cpa"]),
-                round(kw["cvr_send"], 2), round(kw["cvr_click"], 2),
-                chg_pct(kw["sends"], prev_kpi["sends"]) if prev_kpi else "-",
-                chg_pt(kw["open_rate"], prev_kpi["open_rate"]) if prev_kpi else "-",
-                chg_pt(kw["click_rate"], prev_kpi["click_rate"]) if prev_kpi else "-",
-                chg_pt(kw["cvr_click"], prev_kpi["cvr_click"]) if prev_kpi else "-",
-            ]
+            wl = monday.strftime("%Y/%m/%d") + "~" + sunday.strftime("%Y/%m/%d")
+            if raw_only:
+                row = [wl, kw["sends"], kw["opens"], kw["clicks"], kw["cvs"], kw["rev"]]
+            else:
+                row = [
+                    wl,
+                    kw["sends"], kw["opens"], round(kw["open_rate"], 1),
+                    kw["clicks"], round(kw["click_rate"], 1),
+                    kw["cvs"], kw["rev"], round(kw["cost"]), round(kw["cpa"]),
+                    round(kw["cvr_send"], 2), round(kw["cvr_click"], 2),
+                    chg_pct(kw["sends"], prev_kpi["sends"]) if prev_kpi else "-",
+                    chg_pt(kw["open_rate"], prev_kpi["open_rate"]) if prev_kpi else "-",
+                    chg_pt(kw["click_rate"], prev_kpi["click_rate"]) if prev_kpi else "-",
+                    chg_pt(kw["cvr_click"], prev_kpi["cvr_click"]) if prev_kpi else "-",
+                ]
             all_rows.append(row)
             prev_kpi = kw
-            print(f"  {wl}: 送付={kw['sends']:,} 開封率={kw['open_rate']:.1f}%")
-
+            print(str(wl) + ": 送付=" + str(kw["sends"]) + " CV=" + str(kw["cvs"]))
         import gspread
         from google.oauth2.service_account import Credentials as _Creds
         creds = _Creds.from_service_account_info(
@@ -1303,7 +1308,8 @@ if __name__ == "__main__":
 
     if args.backfill_weekly_client:
         backfill_weekly_sheets(client_filter=args.backfill_weekly_client,
-                               sheet_name=args.backfill_weekly_client + " 週次")
+                               sheet_name=args.backfill_weekly_client + " 週次",
+                               raw_only=True)
         sys.exit(0)
 
     if not PASSWORD:

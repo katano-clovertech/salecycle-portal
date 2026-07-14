@@ -1292,11 +1292,18 @@ if __name__ == "__main__":
                         help="全週データをGoogle Sheetsに一括書き込み")
     parser.add_argument("--backfill-missing-client", metavar="CLIENT_NAME",
                         help="指定クライアントの欠損日を自動検出して再収集（部分一致）")
+    parser.add_argument("--backfill-weekly-client", metavar="CLIENT_NAME",
+                        help="指定クライアントの週次シートのみバックフィル（例: Radishbo-ya）")
     args = parser.parse_args()
 
     if args.backfill_weekly:
         backfill_weekly_sheets()
         backfill_weekly_sheets(client_filter="Radishbo-ya", sheet_name="Radishbo-ya 週次")
+        sys.exit(0)
+
+    if args.backfill_weekly_client:
+        backfill_weekly_sheets(client_filter=args.backfill_weekly_client,
+                               sheet_name=args.backfill_weekly_client + " 週次")
         sys.exit(0)
 
     if not PASSWORD:

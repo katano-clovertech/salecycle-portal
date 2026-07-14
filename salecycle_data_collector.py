@@ -1214,6 +1214,73 @@ def send_slack_error(error_msg, mode="main"):
         pass
 
 
+def backfill_missing_for_client(client_filter):
+    """指定クライアントの欠損日をCSVから検出して再収集する"""
+    import pandas as _pd
+    print(f"=== Missing Date Backfill for '{client_filter}' ===")
+
+    csv_path = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.csv")
+    if not os.path.exists(csv_path):
+        print("ERROR: salecycle_daily_report.csv が見つかりません")
+        return
+
+    df = _pd.read_csv(csv_path, encoding="utf-8-sig")
+    df["日付"] = _pd.to_datetime(df["日付"], format="mixed").dt.date
+    client_df = df[df["クライアント"].str.contains(client_filter, case=False, na=False)]
+
+    if client_df.empty:
+        print(f"ERROR: '{client_filter}' に一致するデータがありません")
+        return
+
+    existing_dates = set(client_df["日付"].apply(lambda d: d.strftime("%Y-%m-%d")))
+
+    today = datetime.datetime.now().date()
+    yesterday = today - datetime.timedelta(days=1)
+    start = client_df["日付"].min()
+
+    missing = []
+    d = start
+    while d <= yesterday:
+        d_str = d.strftime("%Y-%m-%d")
+        if d_str not in existing_dates:
+            days_ago = (today - d).days
+            missing.append((days_ago, d_str))
+        d += datetime.timedelta(days=1)
+
+    if not missing:
+        print("欠損なし - バックフィル不要")
+        return
+
+    print(f"欠損日数: {len(missing)}日")
+    for _, d_str in missing:
+        print(f"  {d_str}")
+
+    all_clients = read_clients_from_excel()
+    filtered = [c for c in all_clients if client_filter.lower() in c["name"].lower()]
+    if not filtered:
+        print(f"ERROR: clients.csv に '{client_filter}' が見つかりません")
+        return
+
+    print(f"対象クライアント: {[c[chr(39)+'name'+chr(39)] for c in filtered]}")
+
+    needed_dashboards = set()
+    for c in filtered:
+        needed_dashboards.update(c["dashboards"])
+
+    templates = load_templates_from_files()
+    for dtype in sorted(needed_dashboards):
+        if dtype not in templates:
+            print(f"  WARNING: '{dtype}' のテンプレートがありません")
+
+    session, headers = get_looker_session()
+
+    for days_ago, report_date in missing:
+        collect_for_date(session, headers, templates, filtered, report_date, days_ago, skip_slack=True)
+
+    print(f"
+=== '{client_filter}' バックフィル完了: {len(missing)}日分 ===")
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="SaleCycle Daily Data Collector")
@@ -1223,6 +1290,8 @@ if __name__ == "__main__":
                         help="指定日から昨日までの欠損データを一括収集")
     parser.add_argument("--backfill-weekly", action="store_true",
                         help="全週データをGoogle Sheetsに一括書き込み")
+    parser.add_argument("--backfill-missing-client", metavar="CLIENT_NAME",
+                        help="指定クライアントの欠損日を自動検出して再収集（部分一致）")
     args = parser.parse_args()
 
     if args.backfill_weekly:
@@ -1233,6 +1302,10 @@ if __name__ == "__main__":
     if not PASSWORD:
         print("ERROR: SALECYCLE_PASS environment variable not set")
         sys.exit(1)
+
+    if args.backfill_missing_client:
+        backfill_missing_for_client(args.backfill_missing_client)
+        sys.exit(0)
 
     if args.from_date:
         mode = "backfill"

@@ -1277,8 +1277,8 @@ def backfill_missing_for_client(client_filter):
     for days_ago, report_date in missing:
         collect_for_date(session, headers, templates, filtered, report_date, days_ago, skip_slack=True)
 
-    print(f"
-=== '{client_filter}' バックフィル完了: {len(missing)}日分 ===")
+    msg = chr(10) + "=== " + client_filter + " backfill complete: " + str(len(missing)) + " days ==="
+    print(msg)
 
 
 if __name__ == "__main__":

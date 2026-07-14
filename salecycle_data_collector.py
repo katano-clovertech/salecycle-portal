@@ -920,9 +920,137 @@ def startup_backfill():
 
     for days_ago, report_date in missing:
         collect_for_date(session, headers, templates, clients, report_date, days_ago)
+    write_weekly_report_to_sheets()
 
     print("\n=== Backfill Complete ===")
 
+
+
+def write_weekly_report_to_sheets():
+    """月曜日の実行時に前週データを集計してGoogle Sheetsの週次レポートシートに書き込む"""
+    today = datetime.datetime.now().date()
+    if today.weekday() != 0:
+        print("  [WeeklySheet] 月曜日以外のためスキップ")
+        return
+
+    import json as _json
+    creds_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
+    if not creds_json:
+        print("  [WeeklySheet] GOOGLE_SERVICE_ACCOUNT_JSON が未設定のためスキップ")
+        return
+
+    last_sunday  = today - datetime.timedelta(days=1)
+    last_monday  = last_sunday  - datetime.timedelta(days=6)
+    prev_sunday  = last_monday  - datetime.timedelta(days=1)
+    prev_monday  = prev_sunday  - datetime.timedelta(days=6)
+
+    _csv_path = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.csv")
+    if not os.path.exists(_csv_path):
+        print("  [WeeklySheet] CSVファイルが見つかりません")
+        return
+
+    try:
+        df = pd.read_csv(_csv_path, encoding="utf-8-sig")
+        df["日付"] = pd.to_datetime(df["日付"]).dt.date
+        for col in ["送付件数", "開封数", "クリック数",
+                    "コンバージョン数", "コンバージョン金額"]:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+        def get_kpi(start, end):
+            sub = df[(df["日付"] >= start) & (df["日付"] <= end)]
+            sends  = int(sub["送付件数"].sum())
+            opens  = int(sub["開封数"].sum())
+            clicks = int(sub["クリック数"].sum())
+            cvs    = int(sub["コンバージョン数"].sum())
+            rev    = int(sub["コンバージョン金額"].sum()) if "コンバージョン金額" in sub.columns else 0
+            cost   = rev * 0.1
+            cpa    = cost / cvs if cvs > 0 else 0
+            cvr_send  = cvs / sends  * 100 if sends  > 0 else 0
+            cvr_click = cvs / clicks * 100 if clicks > 0 else 0
+            open_rate  = opens  / sends * 100 if sends > 0 else 0
+            click_rate = clicks / sends * 100 if sends > 0 else 0
+            return dict(sends=sends, opens=opens, clicks=clicks, cvs=cvs, rev=rev,
+                        cost=cost, cpa=cpa, cvr_send=cvr_send, cvr_click=cvr_click,
+                        open_rate=open_rate, click_rate=click_rate)
+
+        kw = get_kpi(last_monday, last_sunday)
+        pw = get_kpi(prev_monday, prev_sunday)
+
+        def chg_pct(cur, prev, hib=True):
+            if prev == 0:
+                return "N/A"
+            p = (cur - prev) / prev * 100
+            if hib:
+                t = "大幅増加" if p>=15 else "増加" if p>=5 else "ほぼ横ばい" if p>=-5 else "微減" if p>=-15 else "大幅減少"
+            else:
+                t = "大幅改善" if p<=-15 else "改善" if p<=-5 else "ほぼ横ばい" if p<=5 else "微増" if p<=15 else "大幅悪化"
+            return f"{p:+.1f}%（{t}）"
+
+        def chg_pt(cur, prev, hib=True):
+            d = cur - prev
+            if hib:
+                t = "大幅上昇" if d>=2 else "上昇" if d>=0.5 else "ほぼ横ばい" if d>=-0.5 else "微減" if d>=-2 else "大幅減少"
+            else:
+                t = "大幅改善" if d<=-2 else "改善" if d<=-0.5 else "ほぼ横ばい" if d<=0.5 else "微増" if d<=2 else "大幅悪化"
+            return f"{d:+.2f}pt（{t}）"
+
+        wl = f"{last_monday.strftime('%Y/%m/%d')}（月）　～　{last_sunday.strftime('%Y/%m/%d')}（日）"
+
+        rows = [
+            [f"週次レポート: {wl}", "", "", ""],
+            ["", "", "", ""],
+            ["■ KPIサマリー", "", "", ""],
+            ["指標", "値", "", ""],
+            ["配信完了数",       f"{kw['sends']:,}件", "", ""],
+            ["メール開封数",  f"{kw['opens']:,}件（{kw['open_rate']:.1f}%）", "", ""],
+            ["リンククリック数", f"{kw['clicks']:,}件（{kw['click_rate']:.1f}%）", "", ""],
+            ["コンバージョン数",  f"{kw['cvs']:,}件", "", ""],
+            ["コンバージョン金額", f"{kw['rev']:,}円", "", ""],
+            ["コスト（‰10%算出）", f"{kw['cost']:,.0f}円", "", ""],
+            ["CPA",                                 f"{kw['cpa']:,.0f}円", "", ""],
+            ["配信完了起点CVR",  f"{kw['cvr_send']:.2f}%", "", ""],
+            ["クリック起点CVR",  f"{kw['cvr_click']:.2f}%", "", ""],
+            ["", "", "", ""],
+            ["■ 分析（先週比）", "", "", ""],
+            ["指標", "先週", "今週", "変化"],
+            ["送付数",
+             f"{pw['sends']:,}件", f"{kw['sends']:,}件",
+             f"{kw['sends']-pw['sends']:+,}件 {chg_pct(kw['sends'],pw['sends'])}"],
+            ["開封率",
+             f"{pw['open_rate']:.1f}%", f"{kw['open_rate']:.1f}%",
+             chg_pt(kw['open_rate'], pw['open_rate'])],
+            ["リンククリック率",
+             f"{pw['click_rate']:.1f}%", f"{kw['click_rate']:.1f}%",
+             chg_pt(kw['click_rate'], pw['click_rate'])],
+            ["クリック起点CVR",
+             f"{pw['cvr_click']:.2f}%", f"{kw['cvr_click']:.2f}%",
+             chg_pt(kw['cvr_click'], pw['cvr_click'])],
+            ["配信完了起点CVR",
+             f"{pw['cvr_send']:.2f}%", f"{kw['cvr_send']:.2f}%",
+             chg_pt(kw['cvr_send'], pw['cvr_send'])],
+            ["", "", "", ""],
+            ["━" * 30, "", "", ""],
+        ]
+
+        import gspread
+        from google.oauth2.service_account import Credentials as _Creds
+        creds = _Creds.from_service_account_info(
+            _json.loads(creds_json),
+            scopes=["https://www.googleapis.com/auth/spreadsheets"],
+        )
+        gc = gspread.authorize(creds)
+        sh = gc.open_by_key(GOOGLE_SHEETS_ID)
+        try:
+            ws = sh.worksheet("週次レポート")
+        except gspread.WorksheetNotFound:
+            ws = sh.add_worksheet(title="週次レポート", rows=2000, cols=6)
+
+        ws.insert_rows(rows, row=1, value_input_option="USER_ENTERED")
+        print(f"  [WeeklySheet] 週次レポートを書き込みました ({wl})")
+
+    except Exception as e:
+        print(f"  [WeeklySheet] 週次レポートエラー: {e}")
 
 def main():
     """通常モード: 昨日のデータを収集する"""

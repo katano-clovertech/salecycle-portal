@@ -1032,7 +1032,7 @@ def write_weekly_report_to_sheets():
         existing = ws.get_all_values()
         if not existing or existing[0][0] != "週":
             ws.insert_row(header, index=1, value_input_option="USER_ENTERED")
-        ws.insert_row(data_row, index=2, value_input_option="USER_ENTERED")
+        ws.append_row(data_row, value_input_option="USER_ENTERED")
         print(f"  [WeeklySheet] 週次レポートを書き込みました ({wl})")
 
     except Exception as e:

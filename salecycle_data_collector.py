@@ -18,6 +18,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 EMAIL = os.environ.get("SALECYCLE_USER", "s.katano@clovertech.jp")
 PASSWORD = os.environ.get("SALECYCLE_PASS", "")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
+GOOGLE_SHEETS_ID = "16i0Mwrsx0o8DwLfSRIRjDcEy_rbhdNbO9mTcnyZkpBw"
 EXCEL_INPUT  = os.path.join(os.path.dirname(__file__), "salecycle動作確認.xlsx")
 CLIENTS_CSV  = os.path.join(os.path.dirname(__file__), "clients.csv")
 EXCEL_OUTPUT = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.xlsx")
@@ -588,6 +589,7 @@ def send_slack_report(alerts, results, report_date):
 
 
 def check_sends_alerts(results, report_date):
+    update_google_sheets(results, report_date)
     """\u9001\u4ed8\u4ef6\u6570\u30c1\u30a7\u30c3\u30af\u30fb\u65e5\u6b21\u30ec\u30dd\u30fc\u30c8\u3092Slack\u306b\u9001\u4fe1\u3059\u308b"""
     dashboard_labels = {"basket": "Basket", "browse": "Browse", "display": "Display"}
     prev_sends = get_previous_sends(report_date)
@@ -642,6 +644,50 @@ def check_sends_alerts(results, report_date):
 
     send_slack_report(alerts, results, report_date)
 
+
+
+def update_google_sheets(results, report_date):
+    """グーグルスプレッドシートに当日データを書き込む（再実行時は上書き）"""
+    import json as _json
+    creds_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
+    if not creds_json:
+        print("  [Sheets] GOOGLE_SERVICE_ACCOUNT_JSON が未設定のためスキップ")
+        return
+    try:
+        import gspread
+        from google.oauth2.service_account import Credentials as _Creds
+        creds = _Creds.from_service_account_info(
+            _json.loads(creds_json),
+            scopes=["https://www.googleapis.com/auth/spreadsheets"],
+        )
+        gc = gspread.authorize(creds)
+        ws = gc.open_by_key(GOOGLE_SHEETS_ID).sheet1
+
+        # ヘッダー確認
+        all_vals = ws.get_all_values()
+        header = ["日付", "クライアント", "ダッシュボード種別", "送付件数", "開封数", "クリック数", "コンバージョン数", "コンバージョン金額"]
+        if not all_vals:
+            ws.append_row(header)
+            all_vals = [header]
+
+        # 今日の既存行を削除（再実行時の重複防止）
+        today_rows = [i + 1 for i, row in enumerate(all_vals) if i > 0 and row and row[0] == report_date]
+        for idx in sorted(today_rows, reverse=True):
+            ws.delete_rows(idx)
+
+        # 新データ追記
+        dash_labels = {"basket": "Basket", "browse": "Browse", "display": "Display"}
+        new_rows = [
+            [report_date, item["client"], dash_labels.get(item["dashboard"], item["dashboard"]),
+             item.get("sends", ""), item.get("opens", ""), item.get("clicks", ""),
+             item.get("conversions", ""), item.get("revenue", "")]
+            for item in results
+        ]
+        if new_rows:
+            ws.append_rows(new_rows, value_input_option="USER_ENTERED")
+        print(f"  [Sheets] {len(new_rows)}行を書き込みました ({report_date})")
+    except Exception as e:
+        print(f"  [Sheets] 更新エラー: {e}")
 
 def find_missing_dates(days_back=7):
     """過去days_back日間でExcelにデータがない日付を (days_ago, date_str) のリストで返す。

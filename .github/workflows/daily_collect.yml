@@ -27,7 +27,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
-          pip install playwright openpyxl pandas requests
+          pip install playwright openpyxl pandas requests gspread google-auth
 
       - name: Install Playwright Chromium
         run: playwright install chromium --with-deps
@@ -37,6 +37,7 @@ jobs:
           SALECYCLE_USER: ${{ secrets.SALECYCLE_USER }}
           SALECYCLE_PASS: ${{ secrets.SALECYCLE_PASS }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           HEADLESS: "1"
         run: python salecycle_data_collector.py
 

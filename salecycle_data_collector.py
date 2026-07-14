@@ -953,7 +953,7 @@ def write_weekly_report_to_sheets():
 
     try:
         df = pd.read_csv(_csv_path, encoding="utf-8-sig")
-        df["日付"] = pd.to_datetime(df["日付"]).dt.date
+        df["日付"] = pd.to_datetime(df["日付"], format="mixed").dt.date
         for col in ["送付件数", "開封数", "クリック数", "コンバージョン数", "コンバージョン金額"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
@@ -1080,7 +1080,7 @@ def backfill_weekly_sheets():
 
     try:
         df = pd.read_csv(_csv_path, encoding="utf-8-sig")
-        df["日付"] = pd.to_datetime(df["日付"]).dt.date
+        df["日付"] = pd.to_datetime(df["日付"], format="mixed").dt.date
         for col in ["送付件数", "開封数", "クリック数", "コンバージョン数", "コンバージョン金額"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)

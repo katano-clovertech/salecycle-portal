@@ -1065,8 +1065,11 @@ def main():
 
 
 
-def backfill_weekly_sheets():
-    """CSVの全期間を週単位で集計してGoogle Sheetsに一括書き込み（シートはクリアして上書き）"""
+def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート"):
+    """CSVの全期間を週単位で集計してGoogle Sheetsに一括書き込み
+    client_filter: Noneで全クライアント、文字列で部分一致フィルター
+    sheet_name: 書き込み先シート名
+    """
     import json as _json
     creds_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
     if not creds_json:
@@ -1085,8 +1088,15 @@ def backfill_weekly_sheets():
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-        # 全期間の月曜日リストを作成（今週は除く）
+        if client_filter:
+            df = df[df["クライアント"].str.contains(client_filter, case=False, na=False)]
+            print(f"  [WeeklySheet] フィルター適用: {client_filter} ({len(df)}行)")
+
         all_dates = sorted(df["日付"].unique())
+        if not all_dates:
+            print("  [WeeklySheet] データが見つかりません")
+            return
+
         first_monday = all_dates[0] - datetime.timedelta(days=all_dates[0].weekday())
         today = datetime.datetime.now().date()
         this_monday = today - datetime.timedelta(days=today.weekday())
@@ -1173,18 +1183,19 @@ def backfill_weekly_sheets():
         gc = gspread.authorize(creds)
         sh = gc.open_by_key(GOOGLE_SHEETS_ID)
         try:
-            ws = sh.worksheet("週次レポート")
+            ws = sh.worksheet(sheet_name)
             ws.clear()
         except gspread.WorksheetNotFound:
-            ws = sh.add_worksheet(title="週次レポート", rows=2000, cols=20)
+            ws = sh.add_worksheet(title=sheet_name, rows=2000, cols=20)
 
         ws.update(all_rows, value_input_option="USER_ENTERED")
-        print(f"  [WeeklySheet] {len(all_rows)-1}週分を書き込みました")
+        print(f"  [WeeklySheet] {len(all_rows)-1}週分を「{sheet_name}」に書き込みました")
 
     except Exception as e:
         import traceback
         print(f"  [WeeklySheet] バックフィルエラー: {e}")
         print(traceback.format_exc())
+
 
 def send_slack_error(error_msg, mode="main"):
     """スクリプトがエラーで落ちた時にSlackへ通知する"""
@@ -1216,6 +1227,7 @@ if __name__ == "__main__":
 
     if args.backfill_weekly:
         backfill_weekly_sheets()
+        backfill_weekly_sheets(client_filter="Radishbo-ya", sheet_name="Radishbo-ya 週次")
         sys.exit(0)
 
     if not PASSWORD:

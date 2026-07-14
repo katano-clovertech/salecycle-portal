@@ -1261,7 +1261,7 @@ def backfill_missing_for_client(client_filter):
         print(f"ERROR: clients.csv に '{client_filter}' が見つかりません")
         return
 
-    print(f"対象クライアント: {[c[chr(39)+'name'+chr(39)] for c in filtered]}")
+    print("対象クライアント: " + str([c["name"] for c in filtered]))
 
     needed_dashboards = set()
     for c in filtered:

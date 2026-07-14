@@ -79,6 +79,7 @@ jobs:
           git add salecycle_daily_report.csv
           git diff --cached --quiet && echo "No changes to commit" || (
             git commit -m "data: $(date -u +%Y-%m-%d)"
+            git pull --rebase origin main
             git push
           )
 

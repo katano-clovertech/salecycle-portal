@@ -927,7 +927,9 @@ def startup_backfill():
 
 
 def write_weekly_report_to_sheets():
-    """月曜日の実行時に前週データを集計してGoogle Sheetsの週次レポートシートに書き込む"""
+    """月曜日の実行時に前週データを集計してGoogle Sheetsの週次レポートシートに書き込む
+    フォーマット: 縦=週（日付）、横=指標（項目）
+    """
     today = datetime.datetime.now().date()
     if today.weekday() != 0:
         print("  [WeeklySheet] 月曜日以外のためスキップ")
@@ -939,10 +941,10 @@ def write_weekly_report_to_sheets():
         print("  [WeeklySheet] GOOGLE_SERVICE_ACCOUNT_JSON が未設定のためスキップ")
         return
 
-    last_sunday  = today - datetime.timedelta(days=1)
-    last_monday  = last_sunday  - datetime.timedelta(days=6)
-    prev_sunday  = last_monday  - datetime.timedelta(days=1)
-    prev_monday  = prev_sunday  - datetime.timedelta(days=6)
+    last_sunday = today - datetime.timedelta(days=1)
+    last_monday = last_sunday - datetime.timedelta(days=6)
+    prev_sunday = last_monday - datetime.timedelta(days=1)
+    prev_monday = prev_sunday - datetime.timedelta(days=6)
 
     _csv_path = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.csv")
     if not os.path.exists(_csv_path):
@@ -952,8 +954,7 @@ def write_weekly_report_to_sheets():
     try:
         df = pd.read_csv(_csv_path, encoding="utf-8-sig")
         df["日付"] = pd.to_datetime(df["日付"]).dt.date
-        for col in ["送付件数", "開封数", "クリック数",
-                    "コンバージョン数", "コンバージョン金額"]:
+        for col in ["送付件数", "開封数", "クリック数", "コンバージョン数", "コンバージョン金額"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
@@ -978,8 +979,7 @@ def write_weekly_report_to_sheets():
         pw = get_kpi(prev_monday, prev_sunday)
 
         def chg_pct(cur, prev, hib=True):
-            if prev == 0:
-                return "N/A"
+            if prev == 0: return "N/A"
             p = (cur - prev) / prev * 100
             if hib:
                 t = "大幅増加" if p>=15 else "増加" if p>=5 else "ほぼ横ばい" if p>=-5 else "微減" if p>=-15 else "大幅減少"
@@ -995,42 +995,25 @@ def write_weekly_report_to_sheets():
                 t = "大幅改善" if d<=-2 else "改善" if d<=-0.5 else "ほぼ横ばい" if d<=0.5 else "微増" if d<=2 else "大幅悪化"
             return f"{d:+.2f}pt（{t}）"
 
-        wl = f"{last_monday.strftime('%Y/%m/%d')}（月）　～　{last_sunday.strftime('%Y/%m/%d')}（日）"
+        wl = f"{last_monday.strftime('%Y/%m/%d')}~{last_sunday.strftime('%Y/%m/%d')}"
 
-        rows = [
-            [f"週次レポート: {wl}", "", "", ""],
-            ["", "", "", ""],
-            ["■ KPIサマリー", "", "", ""],
-            ["指標", "値", "", ""],
-            ["配信完了数",       f"{kw['sends']:,}件", "", ""],
-            ["メール開封数",  f"{kw['opens']:,}件（{kw['open_rate']:.1f}%）", "", ""],
-            ["リンククリック数", f"{kw['clicks']:,}件（{kw['click_rate']:.1f}%）", "", ""],
-            ["コンバージョン数",  f"{kw['cvs']:,}件", "", ""],
-            ["コンバージョン金額", f"{kw['rev']:,}円", "", ""],
-            ["コスト（‰10%算出）", f"{kw['cost']:,.0f}円", "", ""],
-            ["CPA",                                 f"{kw['cpa']:,.0f}円", "", ""],
-            ["配信完了起点CVR",  f"{kw['cvr_send']:.2f}%", "", ""],
-            ["クリック起点CVR",  f"{kw['cvr_click']:.2f}%", "", ""],
-            ["", "", "", ""],
-            ["■ 分析（先週比）", "", "", ""],
-            ["指標", "先週", "今週", "変化"],
-            ["送付数",
-             f"{pw['sends']:,}件", f"{kw['sends']:,}件",
-             f"{kw['sends']-pw['sends']:+,}件 {chg_pct(kw['sends'],pw['sends'])}"],
-            ["開封率",
-             f"{pw['open_rate']:.1f}%", f"{kw['open_rate']:.1f}%",
-             chg_pt(kw['open_rate'], pw['open_rate'])],
-            ["リンククリック率",
-             f"{pw['click_rate']:.1f}%", f"{kw['click_rate']:.1f}%",
-             chg_pt(kw['click_rate'], pw['click_rate'])],
-            ["クリック起点CVR",
-             f"{pw['cvr_click']:.2f}%", f"{kw['cvr_click']:.2f}%",
-             chg_pt(kw['cvr_click'], pw['cvr_click'])],
-            ["配信完了起点CVR",
-             f"{pw['cvr_send']:.2f}%", f"{kw['cvr_send']:.2f}%",
-             chg_pt(kw['cvr_send'], pw['cvr_send'])],
-            ["", "", "", ""],
-            ["━" * 30, "", "", ""],
+        header = [
+            "週",
+            "配信完了数", "開封数", "開封率(%)", "クリック数", "クリック率(%)",
+            "CV数", "CV金額(円)", "コスト(円)", "CPA(円)",
+            "配信起点CVR(%)", "クリック起点CVR(%)",
+            "送付数_先週比", "開封率_増減", "CR_増減", "CVR_増減",
+        ]
+        data_row = [
+            wl,
+            kw["sends"], kw["opens"], round(kw["open_rate"], 1),
+            kw["clicks"], round(kw["click_rate"], 1),
+            kw["cvs"], kw["rev"], round(kw["cost"]), round(kw["cpa"]),
+            round(kw["cvr_send"], 2), round(kw["cvr_click"], 2),
+            chg_pct(kw["sends"], pw["sends"]),
+            chg_pt(kw["open_rate"], pw["open_rate"]),
+            chg_pt(kw["click_rate"], pw["click_rate"]),
+            chg_pt(kw["cvr_click"], pw["cvr_click"]),
         ]
 
         import gspread
@@ -1044,9 +1027,12 @@ def write_weekly_report_to_sheets():
         try:
             ws = sh.worksheet("週次レポート")
         except gspread.WorksheetNotFound:
-            ws = sh.add_worksheet(title="週次レポート", rows=2000, cols=6)
+            ws = sh.add_worksheet(title="週次レポート", rows=2000, cols=20)
 
-        ws.insert_rows(rows, row=1, value_input_option="USER_ENTERED")
+        existing = ws.get_all_values()
+        if not existing or existing[0][0] != "週":
+            ws.insert_row(header, index=1, value_input_option="USER_ENTERED")
+        ws.insert_row(data_row, index=2, value_input_option="USER_ENTERED")
         print(f"  [WeeklySheet] 週次レポートを書き込みました ({wl})")
 
     except Exception as e:

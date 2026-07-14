@@ -1146,8 +1146,16 @@ def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート", 
                 t = "大幅改善" if d<=-2 else "改善" if d<=-0.5 else "ほぼ横ばい" if d<=0.5 else "微増" if d<=2 else "大幅悪化"
             return f"{d:+.2f}pt（{t}）"
 
+
         if raw_only:
-            header = ["週", "送付数", "開封数", "クリック数", "CV数", "CV金額(円)"]
+            # 生数値のみ収集
+            data_rows = []
+            for monday in mondays:
+                sunday = monday + datetime.timedelta(days=6)
+                kw = get_kpi(monday, sunday)
+                wl = monday.strftime("%Y/%m/%d") + "~" + sunday.strftime("%Y/%m/%d")
+                data_rows.append([wl, kw["sends"], kw["opens"], kw["clicks"], kw["cvs"], kw["rev"]])
+                print(str(wl) + ": 送付=" + str(kw["sends"]) + " CV=" + str(kw["cvs"]))
         else:
             header = [
                 "週",
@@ -1156,15 +1164,12 @@ def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート", 
                 "配信起点CVR(%)", "クリック起点CVR(%)",
                 "送付数_先週比", "開封率_増減", "CR_増減", "CVR_増減",
             ]
-        all_rows = [header]
-        prev_kpi = None
-        for monday in mondays:
-            sunday = monday + datetime.timedelta(days=6)
-            kw = get_kpi(monday, sunday)
-            wl = monday.strftime("%Y/%m/%d") + "~" + sunday.strftime("%Y/%m/%d")
-            if raw_only:
-                row = [wl, kw["sends"], kw["opens"], kw["clicks"], kw["cvs"], kw["rev"]]
-            else:
+            all_rows = [header]
+            prev_kpi = None
+            for monday in mondays:
+                sunday = monday + datetime.timedelta(days=6)
+                kw = get_kpi(monday, sunday)
+                wl = monday.strftime("%Y/%m/%d") + "~" + sunday.strftime("%Y/%m/%d")
                 row = [
                     wl,
                     kw["sends"], kw["opens"], round(kw["open_rate"], 1),
@@ -1176,9 +1181,10 @@ def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート", 
                     chg_pt(kw["click_rate"], prev_kpi["click_rate"]) if prev_kpi else "-",
                     chg_pt(kw["cvr_click"], prev_kpi["cvr_click"]) if prev_kpi else "-",
                 ]
-            all_rows.append(row)
-            prev_kpi = kw
-            print(str(wl) + ": 送付=" + str(kw["sends"]) + " CV=" + str(kw["cvs"]))
+                all_rows.append(row)
+                prev_kpi = kw
+                print(str(wl) + ": 送付=" + str(kw["sends"]) + " CV=" + str(kw["cvs"]))
+
         import gspread
         from google.oauth2.service_account import Credentials as _Creds
         creds = _Creds.from_service_account_info(
@@ -1189,12 +1195,30 @@ def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート", 
         sh = gc.open_by_key(GOOGLE_SHEETS_ID)
         try:
             ws = sh.worksheet(sheet_name)
-            ws.clear()
         except gspread.WorksheetNotFound:
             ws = sh.add_worksheet(title=sheet_name, rows=2000, cols=20)
 
-        ws.update(all_rows, value_input_option="USER_ENTERED")
-        print(f"  [WeeklySheet] {len(all_rows)-1}週分を「{sheet_name}」に書き込みました")
+        if raw_only:
+            n = len(data_rows)
+            ws.batch_update([
+                {"range": "A1", "values": [["週"]]},
+                {"range": "B1", "values": [["送付数"]]},
+                {"range": "D1", "values": [["開封数"]]},
+                {"range": "F1", "values": [["クリック数"]]},
+                {"range": "H1", "values": [["CV数"]]},
+                {"range": "I1", "values": [["CV金額(円)"]]},
+                {"range": "A2:A" + str(n + 1), "values": [[r[0]] for r in data_rows]},
+                {"range": "B2:B" + str(n + 1), "values": [[r[1]] for r in data_rows]},
+                {"range": "D2:D" + str(n + 1), "values": [[r[2]] for r in data_rows]},
+                {"range": "F2:F" + str(n + 1), "values": [[r[3]] for r in data_rows]},
+                {"range": "H2:H" + str(n + 1), "values": [[r[4]] for r in data_rows]},
+                {"range": "I2:I" + str(n + 1), "values": [[r[5]] for r in data_rows]},
+            ], value_input_option="USER_ENTERED")
+        else:
+            ws.clear()
+            ws.update(all_rows, value_input_option="USER_ENTERED")
+
+        print("  [WeeklySheet] " + str(len(data_rows if raw_only else all_rows) - (0 if raw_only else 1)) + "週分を" + chr(12300) + sheet_name + chr(12301) + "に書き込みました")
 
     except Exception as e:
         import traceback

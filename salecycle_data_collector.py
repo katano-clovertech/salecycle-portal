@@ -1063,6 +1063,12 @@ def main():
 
     print("Done!")
 
+    if datetime.datetime.now().date().weekday() == 0:
+        print("[Monday] Running weekly sheet updates...")
+        write_weekly_report_to_sheets()
+        backfill_weekly_sheets(client_filter="Radishbo-ya", sheet_name="Radishbo-ya 週次", raw_only=True)
+
+
 
 
 def backfill_weekly_sheets(client_filter=None, sheet_name="週次レポート", raw_only=False):

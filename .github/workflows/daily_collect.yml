@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 7 * * *'   # 毎日 07:00 UTC = 16:00 JST
   workflow_dispatch:        # 手動実行ボタン（テスト用）
+    inputs:
+      backfill_weekly:
+        description: '週次レポートを全期間バックフィル (yes と入力)'
+        required: false
+        default: ''
 
 permissions:
   contents: write           # CSV commit/push に必要
@@ -39,7 +44,12 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           HEADLESS: "1"
-        run: python salecycle_data_collector.py
+        run: |
+          if [ "${{ github.event.inputs.backfill_weekly }}" = "yes" ]; then
+            python salecycle_data_collector.py --backfill-weekly
+          else
+            python salecycle_data_collector.py
+          fi
 
       - name: Commit and push updated CSV
         env:

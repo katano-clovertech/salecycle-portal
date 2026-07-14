@@ -1310,6 +1310,65 @@ def backfill_missing_for_client(client_filter):
     print(msg)
 
 
+def backfill_missing_revenue_for_client(client_filter):
+    """指定クライアントのCV数>0かつ金額欠損の日付を再収集する"""
+    import pandas as _pd
+    print("=== Missing Revenue Backfill for " + client_filter + " ===")
+
+    csv_path = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.csv")
+    if not os.path.exists(csv_path):
+        print("ERROR: salecycle_daily_report.csv が見つかりません")
+        return
+
+    df = _pd.read_csv(csv_path, encoding="utf-8-sig")
+    df["コンバージョン金額"] = _pd.to_numeric(df["コンバージョン金額"], errors="coerce")
+    df["コンバージョン数"] = _pd.to_numeric(df["コンバージョン数"], errors="coerce").fillna(0)
+    client_df = df[df["クライアント"].str.contains(client_filter, case=False, na=False)]
+
+    if client_df.empty:
+        print("ERROR: " + client_filter + " に一致するデータがありません")
+        return
+
+    missing_rev = client_df[
+        (client_df["コンバージョン数"] > 0) & (client_df["コンバージョン金額"].isna())
+    ]
+    target_dates = sorted(missing_rev["日付"].unique())
+
+    if not target_dates:
+        print("金額欠損なし - バックフィル不要")
+        return
+
+    today = datetime.datetime.now().date()
+    print("金額欠損日数: " + str(len(target_dates)) + "日")
+    missing = []
+    for d_str in target_dates:
+        d = datetime.datetime.strptime(str(d_str)[:10], "%Y-%m-%d").date()
+        days_ago = (today - d).days
+        missing.append((days_ago, d.strftime("%Y-%m-%d")))
+        print("  " + d.strftime("%Y-%m-%d") + " (" + str(days_ago) + " days ago)")
+
+    all_clients = read_clients_from_excel()
+    filtered = [c for c in all_clients if client_filter.lower() in c["name"].lower()]
+    if not filtered:
+        print("ERROR: clients.csv に " + client_filter + " が見つかりません")
+        return
+
+    print("対象クライアント: " + str([c["name"] for c in filtered]))
+
+    needed_dashboards = set()
+    for c in filtered:
+        needed_dashboards.update(c["dashboards"])
+
+    templates = load_templates_from_files()
+    session, headers = get_looker_session()
+
+    for days_ago, report_date in missing:
+        collect_for_date(session, headers, templates, filtered, report_date, days_ago, skip_slack=True)
+
+    print("")
+    print("=== " + client_filter + " revenue backfill complete: " + str(len(missing)) + " dates ===")
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="SaleCycle Daily Data Collector")
@@ -1321,6 +1380,8 @@ if __name__ == "__main__":
                         help="全週データをGoogle Sheetsに一括書き込み")
     parser.add_argument("--backfill-missing-client", metavar="CLIENT_NAME",
                         help="指定クライアントの欠損日を自動検出して再収集（部分一致）")
+    parser.add_argument("--backfill-missing-revenue", metavar="CLIENT_NAME",
+                        help="指定クライアントの金額欠損日を再収集（CV数>0かつ金額なしの日）")
     parser.add_argument("--backfill-weekly-client", metavar="CLIENT_NAME",
                         help="指定クライアントの週次シートのみバックフィル（例: Radishbo-ya）")
     args = parser.parse_args()
@@ -1342,6 +1403,10 @@ if __name__ == "__main__":
 
     if args.backfill_missing_client:
         backfill_missing_for_client(args.backfill_missing_client)
+        sys.exit(0)
+
+    if args.backfill_missing_revenue:
+        backfill_missing_revenue_for_client(args.backfill_missing_revenue)
         sys.exit(0)
 
     if args.from_date:

@@ -17,6 +17,10 @@ on:
         description: '指定クライアントの週次シートのみバックフィル（例: Radishbo-ya）'
         required: false
         default: ''
+      backfill_missing_revenue:
+        description: '金額欠損日を再収集するクライアント名（CV数>0かつ金額なしの日）'
+        required: false
+        default: ''
 
 permissions:
   contents: write           # CSV commit/push に必要
@@ -24,7 +28,7 @@ permissions:
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
 
     steps:
       - name: Checkout repository
@@ -59,6 +63,8 @@ jobs:
             python salecycle_data_collector.py --backfill-missing-client "${{ github.event.inputs.backfill_missing_client }}"
           elif [ -n "${{ github.event.inputs.backfill_weekly_client }}" ]; then
             python salecycle_data_collector.py --backfill-weekly-client "${{ github.event.inputs.backfill_weekly_client }}"
+          elif [ -n "${{ github.event.inputs.backfill_missing_revenue }}" ]; then
+            python salecycle_data_collector.py --backfill-missing-revenue "${{ github.event.inputs.backfill_missing_revenue }}"
           else
             python salecycle_data_collector.py
           fi

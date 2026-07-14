@@ -2,7 +2,7 @@ name: SaleCycle Daily Collect
 
 on:
   schedule:
-    - cron: '0 7 * * *'   # 毎日 07:00 UTC = 16:00 JST
+    - cron: '0 6 * * *'   # 毎日 06:00 UTC = 15:00 JST
   workflow_dispatch:        # 手動実行ボタン（テスト用）
     inputs:
       backfill_weekly:

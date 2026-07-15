@@ -18,7 +18,11 @@ on:
         required: false
         default: ''
       backfill_missing_revenue:
-        description: '金額欠損日を再収集するクライアント名（CV数>0かつ金額なしの日）'
+        description: '金額欠損日を再収集（クライアント名を入力 or 空欄で全クライアント）'
+        required: false
+        default: ''
+      from_date:
+        description: '全クライアントの欠損日を一括再収集（例: 2026-01-01）'
         required: false
         default: ''
 
@@ -63,8 +67,12 @@ jobs:
             python salecycle_data_collector.py --backfill-missing-client "${{ github.event.inputs.backfill_missing_client }}"
           elif [ -n "${{ github.event.inputs.backfill_weekly_client }}" ]; then
             python salecycle_data_collector.py --backfill-weekly-client "${{ github.event.inputs.backfill_weekly_client }}"
+          elif [ "${{ github.event.inputs.backfill_missing_revenue }}" = "all" ]; then
+            python salecycle_data_collector.py --backfill-missing-revenue
           elif [ -n "${{ github.event.inputs.backfill_missing_revenue }}" ]; then
             python salecycle_data_collector.py --backfill-missing-revenue "${{ github.event.inputs.backfill_missing_revenue }}"
+          elif [ -n "${{ github.event.inputs.from_date }}" ]; then
+            python salecycle_data_collector.py --from-date "${{ github.event.inputs.from_date }}"
           else
             python salecycle_data_collector.py
           fi

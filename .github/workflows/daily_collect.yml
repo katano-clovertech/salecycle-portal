@@ -84,10 +84,26 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
+          # 生成済みCSVを退避
+          cp salecycle_daily_report.csv /tmp/report_generated.csv
+          # リモートの最新状態を取得してリセット（コンフリクト回避）
+          git fetch origin main
+          git reset --hard origin/main
+          # 退避CSVとリモートCSVをPythonでマージ（日付正規化＋重複排除）
+          python3 - <<'PYEOF'
+          import pandas as pd, sys
+          remote = pd.read_csv("salecycle_daily_report.csv", encoding="utf-8-sig")
+          generated = pd.read_csv("/tmp/report_generated.csv", encoding="utf-8-sig")
+          combined = pd.concat([remote, generated], ignore_index=True)
+          combined["日付"] = pd.to_datetime(combined["日付"], format="mixed").dt.strftime("%Y-%m-%d")
+          combined = combined.drop_duplicates(subset=["日付", "クライアント", "ダッシュボード種別"], keep="last")
+          combined = combined.sort_values(["日付", "クライアント", "ダッシュボード種別"]).reset_index(drop=True)
+          combined.to_csv("salecycle_daily_report.csv", index=False, encoding="utf-8-sig")
+          print(f"Merged: {len(remote)} remote + {len(generated)} generated -> {len(combined)} total rows")
+          PYEOF
           git add salecycle_daily_report.csv
           git diff --cached --quiet && echo "No changes to commit" || (
             git commit -m "data: $(date -u +%Y-%m-%d)"
-            git pull --rebase origin main
             git push
           )
 

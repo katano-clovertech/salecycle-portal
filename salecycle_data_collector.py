@@ -436,8 +436,9 @@ def save_to_excel(results, report_date):
                 _new_df = _pd.DataFrame(new_rows)
                 if os.path.exists(_csv_path):
                     _existing = _pd.read_csv(_csv_path, encoding="utf-8-sig")
-                    # 重複排除してマージ
+                    # 重複排除してマージ（日付フォーマットを統一してから比較）
                     _combined = _pd.concat([_existing, _new_df], ignore_index=True)
+                    _combined["日付"] = _pd.to_datetime(_combined["日付"], format="mixed").dt.strftime("%Y-%m-%d")
                     _combined = _combined.drop_duplicates(subset=["日付", "クライアント", "ダッシュボード種別"], keep="last")
                 else:
                     _combined = _new_df

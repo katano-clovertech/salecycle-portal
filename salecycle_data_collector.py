@@ -590,7 +590,6 @@ def send_slack_report(alerts, results, report_date):
 
 
 def check_sends_alerts(results, report_date):
-    update_google_sheets(results, report_date)
     """\u9001\u4ed8\u4ef6\u6570\u30c1\u30a7\u30c3\u30af\u30fb\u65e5\u6b21\u30ec\u30dd\u30fc\u30c8\u3092Slack\u306b\u9001\u4fe1\u3059\u308b"""
     dashboard_labels = {"basket": "Basket", "browse": "Browse", "display": "Display"}
     prev_sends = get_previous_sends(report_date)

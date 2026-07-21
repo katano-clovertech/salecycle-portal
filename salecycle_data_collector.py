@@ -928,8 +928,9 @@ def startup_backfill():
 
 
 def write_weekly_report_to_sheets():
-    """月曜日の実行時に前週データを集計してGoogle Sheetsの週次レポートシートに書き込む
-    フォーマット: 縦=週（日付）、横=指標（項目）
+    """月曜日の実行時に前週データを Radishbo-ya 週次シートに追記する
+    書き込む列: A(週), B(送付数), D(開封数), F(クリック数), H(CV数), I(CV金額)
+    C/E/G/J以降はシート側の数式に任せるため書き込まない
     """
     today = datetime.datetime.now().date()
     if today.weekday() != 0:
@@ -944,8 +945,6 @@ def write_weekly_report_to_sheets():
 
     last_sunday = today - datetime.timedelta(days=1)
     last_monday = last_sunday - datetime.timedelta(days=6)
-    prev_sunday = last_monday - datetime.timedelta(days=1)
-    prev_monday = prev_sunday - datetime.timedelta(days=6)
 
     _csv_path = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.csv")
     if not os.path.exists(_csv_path):
@@ -955,67 +954,19 @@ def write_weekly_report_to_sheets():
     try:
         df = pd.read_csv(_csv_path, encoding="utf-8-sig")
         df["日付"] = pd.to_datetime(df["日付"], format="mixed").dt.date
+        df = df[df["クライアント"].str.contains("Radishbo-ya", case=False, na=False)]
         for col in ["送付件数", "開封数", "クリック数", "コンバージョン数", "コンバージョン金額"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-        def get_kpi(start, end):
-            sub = df[(df["日付"] >= start) & (df["日付"] <= end)]
-            sends  = int(sub["送付件数"].sum())
-            opens  = int(sub["開封数"].sum())
-            clicks = int(sub["クリック数"].sum())
-            cvs    = int(sub["コンバージョン数"].sum())
-            rev    = int(sub["コンバージョン金額"].sum()) if "コンバージョン金額" in sub.columns else 0
-            cost   = rev * 0.1
-            cpa    = cost / cvs if cvs > 0 else 0
-            cvr_send  = cvs / sends  * 100 if sends  > 0 else 0
-            cvr_click = cvs / clicks * 100 if clicks > 0 else 0
-            open_rate  = opens  / sends * 100 if sends > 0 else 0
-            click_rate = clicks / sends * 100 if sends > 0 else 0
-            return dict(sends=sends, opens=opens, clicks=clicks, cvs=cvs, rev=rev,
-                        cost=cost, cpa=cpa, cvr_send=cvr_send, cvr_click=cvr_click,
-                        open_rate=open_rate, click_rate=click_rate)
-
-        kw = get_kpi(last_monday, last_sunday)
-        pw = get_kpi(prev_monday, prev_sunday)
-
-        def chg_pct(cur, prev, hib=True):
-            if prev == 0: return "N/A"
-            p = (cur - prev) / prev * 100
-            if hib:
-                t = "大幅増加" if p>=15 else "増加" if p>=5 else "ほぼ横ばい" if p>=-5 else "微減" if p>=-15 else "大幅減少"
-            else:
-                t = "大幅改善" if p<=-15 else "改善" if p<=-5 else "ほぼ横ばい" if p<=5 else "微増" if p<=15 else "大幅悪化"
-            return f"{p:+.1f}%（{t}）"
-
-        def chg_pt(cur, prev, hib=True):
-            d = cur - prev
-            if hib:
-                t = "大幅上昇" if d>=2 else "上昇" if d>=0.5 else "ほぼ横ばい" if d>=-0.5 else "微減" if d>=-2 else "大幅減少"
-            else:
-                t = "大幅改善" if d<=-2 else "改善" if d<=-0.5 else "ほぼ横ばい" if d<=0.5 else "微増" if d<=2 else "大幅悪化"
-            return f"{d:+.2f}pt（{t}）"
+        sub = df[(df["日付"] >= last_monday) & (df["日付"] <= last_sunday)]
+        sends  = int(sub["送付件数"].sum())
+        opens  = int(sub["開封数"].sum())
+        clicks = int(sub["クリック数"].sum())
+        cvs    = int(sub["コンバージョン数"].sum())
+        rev    = int(sub["コンバージョン金額"].sum()) if "コンバージョン金額" in sub.columns else 0
 
         wl = f"{last_monday.strftime('%Y/%m/%d')}~{last_sunday.strftime('%Y/%m/%d')}"
-
-        header = [
-            "週",
-            "配信完了数", "開封数", "開封率(%)", "クリック数", "クリック率(%)",
-            "CV数", "CV金額(円)", "コスト(円)", "CPA(円)",
-            "配信起点CVR(%)", "クリック起点CVR(%)",
-            "送付数_先週比", "開封率_増減", "CR_増減", "CVR_増減",
-        ]
-        data_row = [
-            wl,
-            kw["sends"], kw["opens"], round(kw["open_rate"], 1),
-            kw["clicks"], round(kw["click_rate"], 1),
-            kw["cvs"], kw["rev"], round(kw["cost"]), round(kw["cpa"]),
-            round(kw["cvr_send"], 2), round(kw["cvr_click"], 2),
-            chg_pct(kw["sends"], pw["sends"]),
-            chg_pt(kw["open_rate"], pw["open_rate"]),
-            chg_pt(kw["click_rate"], pw["click_rate"]),
-            chg_pt(kw["cvr_click"], pw["cvr_click"]),
-        ]
 
         import gspread
         from google.oauth2.service_account import Credentials as _Creds
@@ -1026,15 +977,25 @@ def write_weekly_report_to_sheets():
         gc = gspread.authorize(creds)
         sh = gc.open_by_key(GOOGLE_SHEETS_ID)
         try:
-            ws = sh.worksheet("週次レポート")
+            ws = sh.worksheet("Radishbo-ya 週次")
         except gspread.WorksheetNotFound:
-            ws = sh.add_worksheet(title="週次レポート", rows=2000, cols=20)
+            ws = sh.add_worksheet(title="Radishbo-ya 週次", rows=2000, cols=20)
 
-        existing = ws.get_all_values()
-        if not existing or existing[0][0] != "週":
-            ws.insert_row(header, index=1, value_input_option="USER_ENTERED")
-        ws.append_row(data_row, value_input_option="USER_ENTERED")
-        print(f"  [WeeklySheet] 週次レポートを書き込みました ({wl})")
+        existing_a = ws.col_values(1)
+        if wl in existing_a:
+            print(f"  [WeeklySheet] {wl} は既に書き込み済みのためスキップ")
+            return
+
+        next_row = len(existing_a) + 1
+        ws.batch_update([
+            {"range": f"A{next_row}", "values": [[wl]]},
+            {"range": f"B{next_row}", "values": [[sends]]},
+            {"range": f"D{next_row}", "values": [[opens]]},
+            {"range": f"F{next_row}", "values": [[clicks]]},
+            {"range": f"H{next_row}", "values": [[cvs]]},
+            {"range": f"I{next_row}", "values": [[rev]]},
+        ], value_input_option="USER_ENTERED")
+        print(f"  [WeeklySheet] {wl} を行{next_row}に書き込みました (送付={sends}, CV={cvs}, 売上={rev:,})")
 
     except Exception as e:
         print(f"  [WeeklySheet] 週次レポートエラー: {e}")

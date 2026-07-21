@@ -676,13 +676,14 @@ def update_google_sheets(results, report_date):
         for idx in sorted(today_rows, reverse=True):
             ws.delete_rows(idx)
 
-        # 新データ追記
+        # 新データ追記（Radishbo-yaのみ）
         dash_labels = {"basket": "Basket", "browse": "Browse", "display": "Display"}
         new_rows = [
             [report_date, item["client"], dash_labels.get(item["dashboard"], item["dashboard"]),
              item.get("sends", ""), item.get("opens", ""), item.get("clicks", ""),
              item.get("conversions", ""), item.get("revenue", "")]
             for item in results
+            if "radishbo-ya" in item.get("client", "").lower()
         ]
         if new_rows:
             ws.append_rows(new_rows, value_input_option="USER_ENTERED")

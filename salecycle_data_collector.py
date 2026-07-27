@@ -18,7 +18,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 EMAIL = os.environ.get("SALECYCLE_USER", "s.katano@clovertech.jp")
 PASSWORD = os.environ.get("SALECYCLE_PASS", "")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
-GOOGLE_SHEETS_ID = "16i0Mwrsx0o8DwLfSRIRjDcEy_rbhdNbO9mTcnyZkpBw"
+GOOGLE_SHEETS_ID = "1ZsdPH1820yM19MLNkVip02699gkVUXoE4SSYbmcRrnk"
 EXCEL_INPUT  = os.path.join(os.path.dirname(__file__), "salecycle動作確認.xlsx")
 CLIENTS_CSV  = os.path.join(os.path.dirname(__file__), "clients.csv")
 EXCEL_OUTPUT = os.path.join(os.path.dirname(__file__), "salecycle_daily_report.xlsx")
